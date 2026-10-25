@@ -78,7 +78,7 @@ Route::get('/fresh-db', function () {
 });
 
 $buildPublicSitemapEntries = function (): array {
-    $base = rtrim((string) app(AppSettingsService::class)->value('canonical_url', config('app.url', 'https://playonlinekhaiwal.com')), '/');
+    $base = rtrim((string) app(AppSettingsService::class)->value('canonical_url', config('app.url', 'https://disawarbazaar.com')), '/');
     $entries = [$base . '/' => null];
     foreach (['about', 'contact', 'faq', 'privacy-policy', 'terms-and-conditions', 'disclaimer'] as $informationSlug) {
         $entries[$base . '/' . $informationSlug] = null;
@@ -153,7 +153,7 @@ Route::get('/sitemap.xml', function () use ($buildPublicSitemapEntries, $renderS
         return $renderSitemapUrlSet($entries);
     }
 
-    $base = rtrim((string) app(AppSettingsService::class)->value('canonical_url', config('app.url', 'https://playonlinekhaiwal.com')), '/');
+    $base = rtrim((string) app(AppSettingsService::class)->value('canonical_url', config('app.url', 'https://disawarbazaar.com')), '/');
     $xml = '<?xml version="1.0" encoding="UTF-8"?>' . "\n" . '<sitemapindex xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">';
     foreach (array_keys($chunks) as $index) {
         $xml .= '<sitemap><loc>' . htmlspecialchars($base . '/sitemap-' . ($index + 1) . '.xml', ENT_XML1 | ENT_QUOTES, 'UTF-8') . '</loc></sitemap>';

@@ -17,7 +17,7 @@ class SupportFaqController extends Controller
         ]);
         $platform = $validated['platform'] ?? 'web';
 
-        $siteKey = (string) config('sites.current_key', config('sites.default', 'play-online-khaiwal'));
+        $siteKey = (string) config('sites.current_key', config('sites.default', 'disawar-bazaar'));
         $faqs = Cache::remember("support-faqs:{$siteKey}:{$platform}", now()->addMinutes(5), function () use ($platform) {
             return Faq::query()
                 ->whereIn('platform', [$platform, 'both'])

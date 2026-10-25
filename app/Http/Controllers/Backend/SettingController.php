@@ -75,8 +75,8 @@ class SettingController extends Controller
 
         foreach (
             [
-                'title' => 'Play Online Khaiwal',
-                'canonical_url' => 'https://playonlinekhaiwal.com',
+                'title' => 'Disawar Bazaar',
+                'canonical_url' => 'https://disawarbazaar.com',
                 'robots_default' => 'index,follow',
                 'twitter_card' => 'summary_large_image',
             ] as $key => $default

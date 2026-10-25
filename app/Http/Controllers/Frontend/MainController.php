@@ -60,12 +60,12 @@ class MainController extends Controller
         $monthlyTables = $charts->homepageTables($games, $monthStart, $monthEnd, $monthDays, $chunkSize);
         $monthLabel = $charts->monthLabel($selectedYear, $selectedMonth);
 
-        $homeCanonical = rtrim((string) app(AppSettingsService::class)->value('canonical_url', 'https://playonlinekhaiwal.com'), '/') . '/';
+        $homeCanonical = rtrim((string) app(AppSettingsService::class)->value('canonical_url', 'https://disawarbazaar.com'), '/') . '/';
         $homeGraph = [[
             '@type' => 'WebPage',
-            'name' => 'Play Online Khaiwal | Satta King Results & Monthly Charts',
+            'name' => 'Disawar Bazaar | Satta King Results & Monthly Charts',
             'url' => $homeCanonical,
-            'description' => app(AppSettingsService::class)->value('meta_description', 'Satta King result records and monthly charts on Play Online Khaiwal.'),
+            'description' => app(AppSettingsService::class)->value('meta_description', 'Satta King result records and monthly charts on Disawar Bazaar.'),
         ]];
         if ($faqs->isNotEmpty()) {
             $homeGraph[] = [
@@ -125,7 +125,7 @@ class MainController extends Controller
         $availableYears[] = $currentYear;
         $availableYears = array_values(array_unique(array_filter($availableYears, fn(int $availableYear) => $availableYear >= 2000 && $availableYear <= $currentYear)));
         rsort($availableYears);
-        $canonical = rtrim((string) app(AppSettingsService::class)->value('canonical_url', 'https://playonlinekhaiwal.com'), '/')
+        $canonical = rtrim((string) app(AppSettingsService::class)->value('canonical_url', 'https://disawarbazaar.com'), '/')
             . '/result/' . $game->slug;
 
         return response()
@@ -192,7 +192,7 @@ class MainController extends Controller
         }
 
         $pages = [
-            'about' => ['About this site', 'Play Online Khaiwal organizes stored Satta King results and historical monthly charts for reference. It does not publish predictions or guarantee future outcomes.'],
+            'about' => ['About this site', 'Disawar Bazaar organizes stored Satta King results and historical monthly charts for reference. It does not publish predictions or guarantee future outcomes.'],
             'contact' => ['Contact', (string) app(AppSettingsService::class)->value('contact_address', 'For website or data-correction questions, use the contact channel configured by the site administrator.')],
             'faq' => ['Frequently asked questions', 'Use the market board to find published results. A dash means no result is available for the selected business date. Historical charts list stored records by market and month.'],
             'privacy-policy' => ['Privacy policy', 'This site should collect only the information needed to operate its features. Consult the site operator for details about deployment-specific logs, cookies, and retention practices.'],
