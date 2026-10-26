@@ -75,8 +75,8 @@ class SettingController extends Controller
 
         foreach (
             [
-                'title' => 'Disawar Bazaar',
-                'canonical_url' => 'https://disawarbazaar.com',
+                'title' => config('app.name', 'Disawar Bazaar'),
+                'canonical_url' => config('app.url', url('/')),
                 'robots_default' => 'index,follow',
                 'twitter_card' => 'summary_large_image',
             ] as $key => $default
