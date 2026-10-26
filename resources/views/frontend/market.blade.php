@@ -42,17 +42,28 @@
 
 @push('schema')
     @php
-        $marketCanonical = rtrim((string) app(\App\Services\AppSettingsService::class)->value('canonical_url', config('app.url', url('/'))), '/') . '/result/' . $game->slug;
+        $homeCanonical = rtrim((string) app(\App\Services\AppSettingsService::class)->value('canonical_url', config('app.url', url('/'))), '/') . '/';
+        $marketCanonical = rtrim($homeCanonical, '/') . '/result/' . $game->slug;
         $marketSchema = [
             '@context' => 'https://schema.org',
             '@graph' => [
                 ['@type' => 'WebPage', 'name' => $game->name . ' Result & Monthly Chart', 'url' => $marketCanonical, 'description' => 'Historical result records and monthly chart for ' . $game->name . '.'],
                 ['@type' => 'BreadcrumbList', 'itemListElement' => [
-                    ['@type' => 'ListItem', 'position' => 1, 'name' => 'Home', 'item' => url('/')],
+                    ['@type' => 'ListItem', 'position' => 1, 'name' => 'Home', 'item' => $homeCanonical],
                     ['@type' => 'ListItem', 'position' => 2, 'name' => $game->name, 'item' => $marketCanonical],
                 ]],
             ],
         ];
+        if ($faqs->isNotEmpty()) {
+            $marketSchema['@graph'][] = [
+                '@type' => 'FAQPage',
+                'mainEntity' => $faqs->map(fn ($faq) => [
+                    '@type' => 'Question',
+                    'name' => strip_tags((string) $faq->question),
+                    'acceptedAnswer' => ['@type' => 'Answer', 'text' => strip_tags((string) $faq->answer)],
+                ])->values()->all(),
+            ];
+        }
     @endphp
     <script type="application/ld+json">{!! json_encode($marketSchema, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE | JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_AMP | JSON_HEX_QUOT) !!}</script>
 @endpush
