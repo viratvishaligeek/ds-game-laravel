@@ -11,7 +11,7 @@
 @section('meta_description', $homeDescription)
 
 @section('content')
-    <section class="home-intro py-5 py-lg-6 bg-light text-dark" aria-labelledby="home-intro-title">
+    <section class="home-intro py-5 py-lg-5 bg-light text-dark" aria-labelledby="home-intro-title">
         <div class="container">
             <div class="row align-items-center g-4 g-lg-5">
                 <div class="col-lg-7">
@@ -51,8 +51,8 @@
                 <div class="sub">
                     @if (!empty($featuredGame['latest_result_date']))
                         Published {{ \Carbon\Carbon::parse($featuredGame['latest_result_date'])->format('d M Y') }}
-                        @if (!empty($featuredGame['latest_result_at']))
-                            · Updated {{ \Carbon\Carbon::parse($featuredGame['latest_result_at'])->timezone(config('app.timezone'))->format('h:i A') }}
+                        @if (!empty($featuredGame['time']) && $featuredGame['time'] !== '—')
+                            · Market time {{ $featuredGame['time'] }}
                         @endif
                     @else
                         No published result record is available yet
