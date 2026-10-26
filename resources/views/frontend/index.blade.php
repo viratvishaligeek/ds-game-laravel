@@ -105,7 +105,11 @@
             @empty
                 <p class="muted center">No active games are configured, so a monthly chart cannot be displayed yet.</p>
             @endforelse
-            <div class="center" style="margin-top:16px"><a class="btn" href="{{ route('frontend.market', ['slug' => $games->first()->slug ?? '']) }}" @if ($games->isEmpty()) aria-disabled="true" @endif>VIEW GAME CHARTS →</a></div>
+            <div class="center" style="margin-top:16px">
+                @if ($games->isNotEmpty())
+                    <a class="btn" href="{{ route('frontend.market', ['slug' => $games->first()->slug]) }}">VIEW GAME CHARTS →</a>
+                @endif
+            </div>
         </div>
     </section>
 
