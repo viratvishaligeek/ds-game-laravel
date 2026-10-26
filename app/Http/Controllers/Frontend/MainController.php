@@ -337,6 +337,18 @@ class MainController extends Controller
         $resultDates = collect($businessDates)->flatMap(fn(array $dates) => array_values($dates))->unique()->values();
         $results = Result::query()->whereIn('game_id', $games->pluck('id'))->where('type', 'jodi')
             ->whereIn('game_date', $resultDates)->orderByDesc('id')->get(['game_id', 'game_date', 'number'])->groupBy('game_id');
+        $latestPublishedResults = Result::query()
+            ->whereIn('game_id', $games->pluck('id'))
+            ->where('type', 'jodi')
+            ->whereNotNull('game_date')
+            ->whereDate('game_date', '<=', $now->toDateString())
+            ->whereNotNull('number')
+            ->where('number', '<>', '')
+            ->orderByDesc('game_date')
+            ->orderByDesc('id')
+            ->get(['id', 'game_id', 'game_date', 'number'])
+            ->unique('game_id')
+            ->keyBy('game_id');
         $latestPublishedAt = Result::query()
             ->whereIn('game_id', $games->pluck('id'))
             ->where('type', 'jodi')
@@ -348,11 +360,12 @@ class MainController extends Controller
             ->groupBy('game_id')
             ->pluck('latest_published_at', 'game_id');
 
-        return $games->map(function (Game $game) use ($results, $businessDates, $latestPublishedAt) {
+        return $games->map(function (Game $game) use ($results, $businessDates, $latestPublishedAt, $latestPublishedResults) {
             $gameResults = $results->get($game->id, collect());
             $dates = $businessDates[$game->id];
             $todayResult = optional($gameResults->firstWhere('game_date', $dates['today']))->number;
             $yesterdayResult = optional($gameResults->firstWhere('game_date', $dates['yesterday']))->number;
+            $latestResult = $latestPublishedResults->get($game->id);
 
             return [
                 'id' => $game->id,
@@ -360,6 +373,8 @@ class MainController extends Controller
                 'slug' => $game->slug,
                 'serial' => (int) $game->serial,
                 'latest_result_at' => $latestPublishedAt->get($game->id),
+                'latest_result' => $latestResult && filled($latestResult->number) ? (string) $latestResult->number : '--',
+                'latest_result_date' => $latestResult?->game_date,
                 'time' => $game->result_time ? Carbon::parse($game->result_time)->format('h:i A') : '—',
                 'today' => $todayResult !== null && $todayResult !== '' ? (string) $todayResult : '--',
                 'yesterday' => $yesterdayResult !== null && $yesterdayResult !== '' ? (string) $yesterdayResult : '--',
