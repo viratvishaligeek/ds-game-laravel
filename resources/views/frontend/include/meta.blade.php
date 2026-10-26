@@ -11,7 +11,7 @@
     $robotsDirective = trim((string) $__env->yieldContent('meta_robots', request()->query->count() ? 'noindex,follow' : $seoSettings->value('robots_default', 'index,follow')));
     $ogImageName = trim((string) $seoSettings->value('og_image', ''));
     $socialImage = $ogImageName !== '' ? asset('logos/' . basename($ogImageName)) : asset('frontend/images/og-image.png');
-    $ogTitle = request()->path() === '' && trim((string) $seoSettings->value('og_title', '')) !== '' ? trim((string) $seoSettings->value('og_title')) : ($pageTitle !== '' ? $pageTitle : $defaultTitle);
+    $ogTitle = request()->routeIs('index') && trim((string) $seoSettings->value('og_title', '')) !== '' ? trim((string) $seoSettings->value('og_title')) : ($pageTitle !== '' ? $pageTitle : $defaultTitle);
     $ogDescription = request()->path() === '' && trim((string) $seoSettings->value('og_description', '')) !== '' ? trim((string) $seoSettings->value('og_description')) : ($pageDescription !== '' ? $pageDescription : $defaultDescription);
     $twitterCard = in_array($seoSettings->value('twitter_card', 'summary_large_image'), ['summary', 'summary_large_image'], true) ? $seoSettings->value('twitter_card', 'summary_large_image') : 'summary_large_image';
     $faviconName = trim((string) $seoSettings->value('site_favicon', ''));
