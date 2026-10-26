@@ -20,13 +20,18 @@ class CommunityController extends Controller
     public function index(Request $request): View|JsonResponse
     {
         $filters = $request->validate([
-            'game_id' => ['sometimes', 'nullable', 'integer', Rule::exists('games', 'id')->where(fn ($query) => $query->where('status', 'active')->whereNull('deleted_at'))],
+            'game_id' => ['sometimes', 'nullable', 'integer', Rule::exists('games', 'id')->where(fn ($query) => $query->where('status', 'active')->whereNull('deleted_at')->where('site_key', config('sites.current_key', config('sites.default', 'disawar-bazaar'))))],
             'year' => ['sometimes', 'nullable', 'integer', 'between:2000,' . now()->timezone(config('app.timezone'))->year],
             'month' => ['sometimes', 'nullable', 'integer', 'between:1,12'],
         ]);
 
-        $query = CommunityPost::query()
+        $filteredPosts = CommunityPost::query()
             ->where('status', 'approved')
+            ->when(!empty($filters['game_id']), fn ($builder) => $builder->where('game_id', $filters['game_id']))
+            ->when(!empty($filters['year']), fn ($builder) => $builder->whereYear('created_at', $filters['year']))
+            ->when(!empty($filters['month']), fn ($builder) => $builder->whereMonth('created_at', $filters['month']));
+
+        $posts = (clone $filteredPosts)
             ->with([
                 'game:id,name,slug',
                 'author:id,name',
@@ -35,33 +40,53 @@ class CommunityController extends Controller
                 },
             ])
             ->withCount('replies')
-            ->when(!empty($filters['game_id']), fn ($builder) => $builder->where('game_id', $filters['game_id']))
-            ->when(!empty($filters['year']), fn ($builder) => $builder->whereYear('created_at', $filters['year']))
-            ->when(!empty($filters['month']), fn ($builder) => $builder->whereMonth('created_at', $filters['month']))
-            ->latest('created_at');
+            ->latest('created_at')
+            ->paginate(15)
+            ->withQueryString();
 
-        $posts = $query->paginate(15)->withQueryString();
-        $approvedCount = CommunityPost::query()->where('status', 'approved')->count();
+        $approvedCount = (clone $filteredPosts)->count();
         $replyCount = CommunityReply::query()
-            ->whereHas('post', fn ($builder) => $builder->where('status', 'approved'))
+            ->whereHas('post', function ($builder) use ($filters) {
+                $builder->where('status', 'approved')
+                    ->when(!empty($filters['game_id']), fn ($query) => $query->where('game_id', $filters['game_id']))
+                    ->when(!empty($filters['year']), fn ($query) => $query->whereYear('community_posts.created_at', $filters['year']))
+                    ->when(!empty($filters['month']), fn ($query) => $query->whereMonth('community_posts.created_at', $filters['month']));
+            })
             ->count();
-        $gameCount = CommunityPost::query()->where('status', 'approved')->distinct()->count('game_id');
+
         $games = Game::query()->where('status', 'active')->orderBy('serial')->orderBy('name')->get(['id', 'name']);
+        $gameCounts = (clone $filteredPosts)
+            ->selectRaw('game_id, COUNT(*) as posts_count')
+            ->groupBy('game_id')
+            ->pluck('posts_count', 'game_id');
+        $gameSummaries = $games->map(fn (Game $game) => [
+            'id' => $game->id,
+            'name' => $game->name,
+            'posts_count' => (int) $gameCounts->get($game->id, 0),
+        ])->filter(fn (array $summary) => $summary['posts_count'] > 0)
+            ->sortByDesc('posts_count')
+            ->values();
+        $gameCount = $gameSummaries->count();
+        $maxPosts = max(1, (int) $gameSummaries->max('posts_count'));
+
         $currentYear = (int) now()->timezone(config('app.timezone'))->format('Y');
-        $oldestYear = (int) (CommunityPost::query()->where('status', 'approved')->min('created_at')
-            ? Carbon::parse(CommunityPost::query()->where('status', 'approved')->min('created_at'))->year
-            : $currentYear);
+        $oldestPostDate = CommunityPost::query()->where('status', 'approved')->min('created_at');
+        $oldestYear = $oldestPostDate ? (int) Carbon::parse($oldestPostDate)->year : $currentYear;
         $years = $oldestYear <= $currentYear ? range($currentYear, $oldestYear) : [$currentYear];
 
         if ($request->expectsJson()) {
             return response()->json([
                 'html' => view('frontend.community.partials.posts', compact('posts'))->render(),
+                'summary_html' => view('frontend.community.partials.game-summary', compact('gameSummaries', 'maxPosts'))->render(),
                 'stats' => ['posts' => $approvedCount, 'replies' => $replyCount, 'games' => $gameCount],
             ]);
         }
 
-        return view('frontend.community.index', compact('posts', 'games', 'filters', 'years', 'approvedCount', 'replyCount', 'gameCount'));
+        return view('frontend.community.index', compact(
+            'posts', 'games', 'filters', 'years', 'approvedCount', 'replyCount', 'gameCount', 'gameSummaries', 'maxPosts'
+        ));
     }
+
     public function create(): View
     {
         $games = Game::query()->where('status', 'active')->orderBy('serial')->orderBy('name')->get(['id', 'name']);
@@ -72,7 +97,7 @@ class CommunityController extends Controller
     public function store(Request $request): RedirectResponse
     {
         $data = $request->validate([
-            'game_id' => ['required', 'integer', Rule::exists('games', 'id')->where(fn($query) => $query->where('status', 'active')->whereNull('deleted_at'))],
+            'game_id' => ['required', 'integer', Rule::exists('games', 'id')->where(fn($query) => $query->where('status', 'active')->whereNull('deleted_at')->where('site_key', config('sites.current_key', config('sites.default', 'disawar-bazaar'))))],
             'title' => ['required', 'string', 'min:4', 'max:120'],
             'body' => ['required', 'string', 'min:10', 'max:5000'],
         ]);

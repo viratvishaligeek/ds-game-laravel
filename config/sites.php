@@ -18,10 +18,10 @@ return [
             'url' => rtrim(env('SITE_PLAY_ONLINE_KHAIWAL_URL', env('APP_URL', 'https://disawarbazaar.com')), '/'),
             'hosts' => ['disawarbazaar.com', 'www.disawarbazaar.com'],
         ],
-        // 'galidisawar' => [
-        //     'name' => 'Gali Disawar',
-        //     'url' => rtrim(env('SITE_GALIDISAWAR_URL', 'https://galidisawar.com'), '/'),
-        //     'hosts' => ['galidisawar.com', 'www.galidisawar.com'],
-        // ],
+        'galidisawar' => [
+            'name' => 'Gali Disawar',
+            'url' => rtrim(env('SITE_GALIDISAWAR_URL', 'https://galidisawar.com'), '/'),
+            'hosts' => ['galidisawar.com', 'www.galidisawar.com'],
+        ],
     ],
 ];

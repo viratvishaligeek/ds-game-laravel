@@ -50,7 +50,7 @@ class MainController extends Controller
             'today',
             'yesterday',
         ])->all())->all();
-        $homepageSections = HomePage::query()->where('status', 'active')->orderBy('id')->get(['id', 'title', 'content']);
+        $homepageSections = HomePage::query()->where('status', 'active')->orderBy('id')->get(['id', 'title', 'content', 'location', 'background'])->groupBy('location');
         $faqs = Faq::query()->where('is_active', true)->whereIn('platform', ['web', 'both'])->whereNull('page_slug')->whereNull('game_id')->orderBy('sort_order')->orderBy('id')->get(['id', 'question', 'answer']);
         $publishedResultsQuery = Result::query()
             ->where('type', 'jodi')
@@ -69,6 +69,10 @@ class MainController extends Controller
         $siteName = trim((string) $settings->value('title', config('app.name', 'Disawar Bazaar')));
         $homeCanonical = rtrim((string) $settings->value('canonical_url', config('app.url', url('/'))), '/') . '/';
         $homeDescription = trim((string) $settings->value('homepage_meta_description', $settings->value('meta_description', 'Browse published result records and historical monthly charts.')));
+        $configuredDownloadUrl = trim((string) $settings->value('app_download_url', ''));
+        $appDownloadUrl = filter_var($configuredDownloadUrl, FILTER_VALIDATE_URL) && strtolower((string) parse_url($configuredDownloadUrl, PHP_URL_SCHEME)) === 'https'
+            ? $configuredDownloadUrl
+            : null;
         $organization = [
             '@type' => 'Organization',
             'name' => $siteName,
@@ -122,6 +126,7 @@ class MainController extends Controller
             'featuredGame',
             'marketResults',
             'homepageSections',
+            'appDownloadUrl',
             'faqs',
             'monthlyTables',
             'monthLabel',
@@ -321,7 +326,13 @@ class MainController extends Controller
         $databaseSlug = $pageAliases[$page] ?? $page;
         $databasePage = Page::query()->where('slug', $databaseSlug)->where('status', 'active')->first();
         if ($databasePage && $page !== 'faq') {
-            return view('frontend.page', ['page' => $databasePage]);
+            $pageFaqs = Faq::query()->where('is_active', true)->whereIn('platform', ['web', 'both'])
+                ->where(function ($query) use ($page, $databaseSlug) {
+                    $query->where(fn ($scope) => $scope->whereNull('page_slug')->whereNull('game_id'))
+                        ->orWhereIn('page_slug', array_values(array_unique([$page, $databaseSlug])));
+                })->orderBy('sort_order')->orderBy('id')->get(['id', 'question', 'answer']);
+
+            return view('frontend.page', ['page' => $databasePage, 'faqs' => $pageFaqs]);
         }
 
         $pages = [

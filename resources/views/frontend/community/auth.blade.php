@@ -1,6 +1,6 @@
 @extends('frontend.include.layout')
 
-@section('meta_title', ($mode === 'register' ? 'Create Community Account' : 'Community Sign In') . ' | ' . config('app.name'))
+@section('meta_title', ($mode === 'register' ? 'Create Community Account' : 'Community Sign In') . ' | ' . app(\App\Services\AppSettingsService::class)->value('title', config('app.name')))
 @section('meta_robots', 'noindex,follow')
 
 @section('content')

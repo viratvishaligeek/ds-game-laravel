@@ -668,3 +668,65 @@ html { scroll-behavior: smooth; }
   .grid-3 { grid-template-columns: repeat(3, 1fr); }
   .rec-grid { grid-template-columns: repeat(5, 1fr); }
 }
+
+
+/* Homepage introduction: Bootstrap-first layout with a small brand-specific accent. */
+.home-intro {
+  position: relative;
+  isolation: isolate;
+  overflow: hidden;
+}
+.home-intro::before {
+  content: "";
+  position: absolute;
+  z-index: -1;
+  width: min(34rem, 80vw);
+  aspect-ratio: 1;
+  right: -10rem;
+  top: -16rem;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(245, 197, 24, .16), transparent 68%);
+  pointer-events: none;
+}
+.home-intro #home-intro-title {
+  font-family: var(--font-heading);
+  letter-spacing: -.025em;
+}
+.home-intro .lead {
+  max-width: 48rem;
+  color: #4b5563;
+  line-height: 1.75;
+}
+.home-intro-panel {
+  border-color: #e5e7eb !important;
+}
+.home-intro-icon {
+  width: 3rem;
+  height: 3rem;
+  flex: 0 0 3rem;
+  color: var(--accent-fg);
+  background: var(--accent);
+}
+.homepage-managed-section .homepage-managed-title {
+  margin-bottom: 1rem;
+}
+.homepage-managed-content > :last-child {
+  margin-bottom: 0;
+}
+@media (max-width: 575.98px) {
+  .home-intro #home-intro-title {
+    font-size: clamp(2.1rem, 10vw, 3rem);
+  }
+  .home-intro .lead {
+    font-size: 1rem;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .home-intro *,
+  .homepage-managed-section * {
+    scroll-behavior: auto !important;
+    animation-duration: .01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: .01ms !important;
+  }
+}

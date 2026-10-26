@@ -1,6 +1,6 @@
 @extends('frontend.include.layout')
 
-@section('meta_title', 'Create Community Post | ' . config('app.name'))
+@section('meta_title', 'Create Community Post | ' . app(\App\Services\AppSettingsService::class)->value('title', config('app.name')))
 @section('meta_robots', 'noindex,follow')
 
 @section('content')

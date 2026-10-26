@@ -1,6 +1,6 @@
 @extends('frontend.include.layout')
 
-@section('meta_title', $title . ' | ' . config('app.name'))
+@section('meta_title', $title . ' | ' . app(\App\Services\AppSettingsService::class)->value('title', config('app.name')))
 @section('meta_description', \Illuminate\Support\Str::limit(strip_tags($copy), 155))
 @section('meta_robots', $page === 'faq' ? 'index,follow' : 'index,follow')
 

@@ -36,7 +36,7 @@ class FaqController extends Controller
             'is_active' => ['required', 'boolean'],
             'sort_order' => ['required', 'integer', 'min:0', 'max:100000'],
             'page_slug' => ['nullable', 'string', 'max:150', 'regex:/^[A-Za-z0-9-]+$/'],
-            'game_id' => ['nullable', 'integer', Rule::exists('games', 'id')->where(fn ($query) => $query->where('status', 'active')->whereNull('deleted_at'))],
+            'game_id' => ['nullable', 'integer', Rule::exists('games', 'id')->where(fn ($query) => $query->where('status', 'active')->whereNull('deleted_at')->where('site_key', config('sites.current_key', config('sites.default', 'disawar-bazaar'))))],
         ]);
         Faq::create($validated);
         $this->clearFaqCache();
@@ -60,7 +60,7 @@ class FaqController extends Controller
             'is_active' => ['required', 'boolean'],
             'sort_order' => ['required', 'integer', 'min:0', 'max:100000'],
             'page_slug' => ['nullable', 'string', 'max:150', 'regex:/^[A-Za-z0-9-]+$/'],
-            'game_id' => ['nullable', 'integer', Rule::exists('games', 'id')->where(fn ($query) => $query->where('status', 'active')->whereNull('deleted_at'))],
+            'game_id' => ['nullable', 'integer', Rule::exists('games', 'id')->where(fn ($query) => $query->where('status', 'active')->whereNull('deleted_at')->where('site_key', config('sites.current_key', config('sites.default', 'disawar-bazaar'))))],
         ]);
         $faq->update($validated);
         $this->clearFaqCache();

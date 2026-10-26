@@ -2,6 +2,7 @@
 
 @section('meta_title', $post->title . ' | Community')
 @section('meta_description', \Illuminate\Support\Str::limit(strip_tags($post->body), 155))
+@section('og_type', 'article')
 
 @section('content')
 <section class="section"><div class="wrap" style="max-width:900px">
@@ -21,7 +22,7 @@
     @empty
         <p class="text-body-secondary">No replies yet.</p>
     @endforelse
-    <div class="mt-3">{{ $replies->links() }}</div>
+    <div class="mt-3">{{ $replies->links('pagination::bootstrap-5') }}</div>
     @auth('web')
         <form class="card mt-4" method="POST" action="{{ route('community.reply', $post->id) }}"><div class="card-body">
             @csrf

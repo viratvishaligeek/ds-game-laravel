@@ -1,6 +1,6 @@
 @extends('frontend.include.layout')
 
-@section('meta_title', 'Monthly Results Charts | ' . config('app.name'))
+@section('meta_title', 'Monthly Results Charts | ' . app(\App\Services\AppSettingsService::class)->value('title', config('app.name')))
 @section('meta_description', 'Browse monthly result records by game, month, and year.')
 @section('meta_robots', request()->query->count() ? 'noindex,follow' : 'index,follow')
 
