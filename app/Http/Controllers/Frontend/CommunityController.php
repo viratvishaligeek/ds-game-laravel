@@ -4,8 +4,11 @@ namespace App\Http\Controllers\Frontend;
 
 use App\Http\Controllers\Controller;
 use App\Models\CommunityPost;
+use App\Models\CommunityReply;
+use Carbon\Carbon;
 use App\Models\Game;
 use App\Services\AppSettingsService;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -14,7 +17,7 @@ use Illuminate\View\View;
 
 class CommunityController extends Controller
 {
-    public function index(Request $request): View|\\Illuminate\\Http\\JsonResponse
+    public function index(Request $request): View|JsonResponse
     {
         $filters = $request->validate([
             'game_id' => ['sometimes', 'nullable', 'integer', Rule::exists('games', 'id')->where(fn ($query) => $query->where('status', 'active')->whereNull('deleted_at'))],
@@ -39,14 +42,14 @@ class CommunityController extends Controller
 
         $posts = $query->paginate(15)->withQueryString();
         $approvedCount = CommunityPost::query()->where('status', 'approved')->count();
-        $replyCount = \\App\\Models\\CommunityReply::query()
+        $replyCount = CommunityReply::query()
             ->whereHas('post', fn ($builder) => $builder->where('status', 'approved'))
             ->count();
         $gameCount = CommunityPost::query()->where('status', 'approved')->distinct()->count('game_id');
         $games = Game::query()->where('status', 'active')->orderBy('serial')->orderBy('name')->get(['id', 'name']);
         $currentYear = (int) now()->timezone(config('app.timezone'))->format('Y');
         $oldestYear = (int) (CommunityPost::query()->where('status', 'approved')->min('created_at')
-            ? \\Illuminate\\Support\\Carbon::parse(CommunityPost::query()->where('status', 'approved')->min('created_at'))->year
+            ? Carbon::parse(CommunityPost::query()->where('status', 'approved')->min('created_at'))->year
             : $currentYear);
         $years = $oldestYear <= $currentYear ? range($currentYear, $oldestYear) : [$currentYear];
 
