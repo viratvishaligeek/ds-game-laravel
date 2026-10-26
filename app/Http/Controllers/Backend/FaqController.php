@@ -13,7 +13,7 @@ class FaqController extends Controller
 {
     public function index(): View
     {
-        $faqs = Faq::latest()->get();
+        $faqs = Faq::query()->orderBy('sort_order')->orderBy('id')->get();
         $pageName = 'FAQs Management';
         return view('backend.faqs.index', compact('faqs', 'pageName'));
     }
