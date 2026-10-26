@@ -25,6 +25,8 @@
             <div class="col-12 col-sm-4"><div class="card h-100"><div class="card-body"><div class="text-body-secondary small">Games discussed</div><div class="display-6" data-stat="games">{{ number_format($gameCount) }}</div></div></div></div>
         </div>
 
+        <div data-community-summary aria-live="polite">@include('frontend.community.partials.game-summary', ['gameSummaries' => $gameSummaries, 'maxPosts' => $maxPosts])</div>
+
         <form class="card mb-4" method="GET" action="{{ route('community.index') }}" data-community-filters>
             <div class="card-body"><div class="row g-3 align-items-end">
                 <div class="col-12 col-md-4"><label class="form-label" for="game_id">Game</label><select class="form-select" name="game_id" id="game_id"><option value="">All games</option>@foreach ($games as $game)<option value="{{ $game->id }}" @selected((string)($filters['game_id'] ?? '') === (string)$game->id)>{{ $game->name }}</option>@endforeach</select></div>
@@ -45,7 +47,8 @@
 (() => {
     const form = document.querySelector('[data-community-filters]');
     const container = document.querySelector('[data-community-posts]');
-    if (!form || !container || !window.fetch) return;
+    const summary = document.querySelector('[data-community-summary]');
+    if (!form || !container || !summary || !window.fetch) return;
     let controller;
     const load = async (url, push = true) => {
         if (controller) controller.abort();
@@ -58,6 +61,7 @@
             if (!response.ok) throw new Error('Unable to load community posts.');
             const data = await response.json();
             container.innerHTML = data.html;
+            summary.innerHTML = data.summary_html || '';
             Object.entries(data.stats || {}).forEach(([key, value]) => {
                 const node = document.querySelector('[data-stat="' + key + '"]');
                 if (node) node.textContent = Number(value).toLocaleString();
