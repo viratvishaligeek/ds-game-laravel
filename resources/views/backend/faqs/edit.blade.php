@@ -46,6 +46,15 @@
                             </select>
                         </div>
                         <div class="col-md-6 mb-3">
+                            <label class="small mb-1" for="page_slug">Page slug (optional)</label>
+                            <input class="form-control" id="page_slug" name="page_slug" type="text" maxlength="150" pattern="[A-Za-z0-9-]+" value="{{ old('page_slug', $faq->page_slug) }}">
+                            <small class="text-muted">Leave blank for global FAQ, or enter a public page slug such as faq or about.</small>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="small mb-1" for="game_id">Game (optional)</label>
+                            <select class="form-select" id="game_id" name="game_id"><option value="">Global / no specific game</option>@foreach ($games as $game)<option value="{{ $game->id }}" @selected((string)old('game_id', $faq->game_id) === (string)$game->id)>{{ $game->name }}</option>@endforeach</select>
+                        </div>
+                        <div class="col-md-6 mb-3">
                             <label class="small mb-1" for="sort_order">Display order</label>
                             <input class="form-control" id="sort_order" name="sort_order" type="number" min="0" max="100000" value="{{ old('sort_order', $faq->sort_order ?? 0) }}" required>
                         </div>
