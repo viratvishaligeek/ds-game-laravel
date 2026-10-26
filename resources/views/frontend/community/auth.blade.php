@@ -22,7 +22,11 @@
             @endif
             <button class="btn btn-primary w-100" type="submit">{{ $mode === 'register' ? 'Create account' : 'Sign in' }}</button>
         </form>
-        <p class="mt-3 mb-0 small">@if ($mode === 'register')Already have an account? <a href="{{ route('community.login') }}">Sign in</a>@elseNew here? <a href="{{ route('community.register') }}">Create an account</a>@endif</p>
+        <p class="mt-3 mb-0 small">@if ($mode === 'register')
+                Already have an account? <a href="{{ route('community.login') }}">Sign in</a>
+            @else
+                New here? <a href="{{ route('community.register') }}">Create an account</a>
+            @endif</p>
     </div></div>
 </div></section>
 @endsection
