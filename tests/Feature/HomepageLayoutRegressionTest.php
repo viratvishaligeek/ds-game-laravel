@@ -50,6 +50,10 @@ class HomepageLayoutRegressionTest extends TestCase
         $this->assertLessThan(strpos($html, 'class="live-hero"'), strpos($html, 'class="home-intro'));
         $this->assertLessThan(strpos($html, 'class="hero"'), strpos($html, 'class="live-hero"'));
         $this->assertLessThan(strpos($html, 'class="lrb-section"'), strpos($html, 'class="hero"'));
+        $this->assertLessThan(strpos($html, 'class="hero"'), strpos($html, 'data-test-section="top-managed"'));
+        $this->assertLessThan(strpos($html, 'data-test-section="top-managed"'), strpos($html, 'class="hero"'));
+        $this->assertLessThan(strpos($html, 'data-test-section="after-results"'), strpos($html, 'class="section alt"'));
+        $this->assertGreaterThan(strpos($html, 'class="lrb-section"'), strpos($html, 'data-test-section="after-results"'));
         $this->assertSame(1, substr_count($html, 'data-test-section="top-managed"'));
         $this->assertSame(1, substr_count($html, 'data-test-section="after-results"'));
     }
