@@ -1,6 +1,6 @@
 @extends('frontend.include.layout')
 
-@section('meta_title', $game->name . ' Result & Monthly Chart | ' . config('app.name'))
+@section('meta_title', $game->name . ' Result & Monthly Chart | ' . app(\App\Services\AppSettingsService::class)->value('title', config('app.name')))
 @section('meta_description', 'Browse stored result records and monthly chart for ' . $game->name . '.')
 @section('meta_robots', request()->query->count() ? 'noindex,follow' : 'index,follow')
 
