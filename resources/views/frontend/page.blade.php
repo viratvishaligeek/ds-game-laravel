@@ -12,3 +12,20 @@
     </article>
 </div></section>
 @endsection
+
+@push('schema')
+    @php
+        $pageCanonical = rtrim((string) app(\App\Services\AppSettingsService::class)->value('canonical_url', config('app.url', url('/'))), '/') . '/pages/' . $page->slug;
+        $pageSchema = [
+            '@context' => 'https://schema.org',
+            '@graph' => [
+                ['@type' => 'WebPage', 'name' => $page->name, 'url' => $pageCanonical, 'description' => \Illuminate\Support\Str::limit(strip_tags((string) $page->content), 250)],
+                ['@type' => 'BreadcrumbList', 'itemListElement' => [
+                    ['@type' => 'ListItem', 'position' => 1, 'name' => 'Home', 'item' => url('/')],
+                    ['@type' => 'ListItem', 'position' => 2, 'name' => $page->name, 'item' => $pageCanonical],
+                ]],
+            ],
+        ];
+    @endphp
+    <script type="application/ld+json">{!! json_encode($pageSchema, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE | JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_AMP | JSON_HEX_QUOT) !!}</script>
+@endpush
