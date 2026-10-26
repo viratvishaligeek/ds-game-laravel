@@ -11,7 +11,7 @@
             <h1>Monthly Results Charts</h1>
             <p class="muted">Select a game, month, and year to view stored result records.</p>
         </div>
-        <form class="card mb-4" method="GET" action="{{ route('charts.index') }}" data-chart-filters data-endpoint="{{ route('charts.data') }}">
+        <form class="card mb-4" method="GET" action="{{ route('charts.index') }}" data-chart-filters data-endpoint="{{ route('charts.data') }}" data-current-year="{{ now()->timezone(config('app.timezone'))->year }}" data-current-month="{{ now()->timezone(config('app.timezone'))->month }}">
             <div class="card-body"><div class="row g-3 align-items-end">
                 <div class="col-12 col-md-4"><label class="form-label" for="game_id">Game</label><select class="form-select" name="game_id" id="game_id"><option value="">All active games</option>@foreach ($games as $game)<option value="{{ $game->id }}" @selected((string)($selectedGameId ?? '') === (string)$game->id)>{{ $game->name }}</option>@endforeach</select></div>
                 <div class="col-6 col-md-3"><label class="form-label" for="year">Year</label><select class="form-select" name="year" id="year">@foreach ($availableYears as $availableYear)<option value="{{ $availableYear }}" @selected($year === $availableYear)>{{ $availableYear }}</option>@endforeach</select></div>
@@ -49,6 +49,18 @@
     const status = document.querySelector('[data-chart-status]');
     if (!form || !table || !window.fetch) return;
     let activeRequest;
+    const currentYear = Number(form.dataset.currentYear);
+    const currentMonth = Number(form.dataset.currentMonth);
+    const monthSelect = form.elements.namedItem('month');
+    const yearSelect = form.elements.namedItem('year');
+    const limitFutureMonths = () => {
+        [...monthSelect.options].forEach(option => {
+            option.disabled = Number(yearSelect.value) === currentYear && Number(option.value) > currentMonth;
+        });
+        if (monthSelect.selectedOptions[0]?.disabled) monthSelect.value = String(currentMonth);
+    };
+    limitFutureMonths();
+    yearSelect.addEventListener('change', limitFutureMonths);
     const load = async (push = true) => {
         const params = new URLSearchParams(new FormData(form));
         for (const [key, value] of [...params.entries()]) if (!value) params.delete(key);
