@@ -45,7 +45,7 @@ $buildPublicSitemapEntries = function (): array {
         $base = rtrim((string) url('/'), '/');
     }
 
-    $entries = [$base . '/' => null];
+    $entries = [$base . '/' => null, $base . '/charts' => null];
     foreach (['about', 'contact', 'faq', 'privacy-policy', 'terms-and-conditions', 'disclaimer'] as $informationSlug) {
         $entries[$base . '/' . $informationSlug] = null;
     }
@@ -102,6 +102,31 @@ $renderSitemapUrlSet = function (array $entries) {
 
     return response($xml, 200)->header('Content-Type', 'application/xml; charset=UTF-8');
 };
+
+Route::get('/robots.txt', function () {
+    $base = rtrim((string) app(AppSettingsService::class)->value('canonical_url', config('app.url', '')), '/');
+    if ($base === '') {
+        $base = rtrim((string) url('/'), '/');
+    }
+
+    $content = implode("\n", [
+        'User-agent: *',
+        'Allow: /',
+        'Disallow: /admin/',
+        'Disallow: /login',
+        'Disallow: /firebase-config.js',
+        'Disallow: /firebase-config.json',
+        'Disallow: /community/login',
+        'Disallow: /community/register',
+        'Disallow: /community/guessing/create',
+        'Disallow: /charts/data',
+        'Disallow: /get_result',
+        'Sitemap: ' . $base . '/sitemap.xml',
+        '',
+    ]);
+
+    return response($content, 200)->header('Content-Type', 'text/plain; charset=UTF-8');
+})->name('robots');
 
 Route::get('/sitemap-{part}.xml', function (string $part) use ($buildPublicSitemapEntries, $renderSitemapUrlSet) {
     abort_unless(ctype_digit($part) && (int) $part >= 1, 404);
