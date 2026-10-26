@@ -89,8 +89,6 @@
             <a href="/" class="active">Home</a>
             <a href="/live-results" class="">Live Results</a>
             <a href="/charts" class="">Charts</a>
-            <a href="/record-charts" class="">Record Charts</a>
-            <a href="/blog" class="">Blog</a>
             <a href="/about" class="">About</a>
             <div class="drop">
                 <button type="button" class="drop-btn ">Results ▾</button>
@@ -118,7 +116,7 @@
                     <a href="/games/gali">Gali</a>
                 </div>
             </div>
-            <a href="/submit-guest-post" class="btn-pill">SUBMIT POST</a>
+            <a href="/submit-guest-post" class="btn-pill">Community</a>
         </nav>
     </div>
 

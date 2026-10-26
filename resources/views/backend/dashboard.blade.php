@@ -19,12 +19,12 @@
             </div>
         </a>
         {{-- Games --}}
-        <a href="{{ route('admin.games.index') }}" class="col-lg-3 col-sm-6 col-6 col-xl-3 mb-2">
+        <a href="{{ route('admin.results.index') }}" class="col-lg-3 col-sm-6 col-6 col-xl-3 mb-2">
             <div class="card bg-white text-black h-100">
                 <div class="card-body">
                     <div class="d-flex justify-content-between align-items-center">
                         <div class="me-3">
-                            <div class="text-dark small fw-bold">Games</div>
+                            <div class="text-dark small fw-bold">Results</div>
                             <div class="text-lg fw-bold">
                                 {{ number_format($totalGames) }}
                             </div>
