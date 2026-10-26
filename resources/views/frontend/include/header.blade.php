@@ -2,22 +2,24 @@
     <div class="ticker">
         <div class="wrap ticker-inner">
             <div class="ticker-track"><div class="ticker-move" data-ticker>
-                @forelse ([$frontendResults, $frontendResults] as $tickerSet)
-                    @foreach ($tickerSet as $gameResult)
-                        <span class="ticker-item" data-slug="{{ $gameResult['slug'] }}">
-                            <span class="ticker-name">{{ \Illuminate\Support\Str::upper($gameResult['name']) }}</span>
-                            <span class="muted">→</span>
-                            @if (($gameResult['today'] ?? '--') !== '--')
-                                <span class="ticker-num">{{ $gameResult['today'] }}</span>
-                            @else
-                                <span class="ticker-wait">{{ $gameResult['time'] ?? '—' }}</span>
-                            @endif
-                            <span class="muted">|</span>
-                        </span>
+                @if ($frontendResults->isNotEmpty())
+                    @foreach ([1, 2] as $tickerCopy)
+                        @foreach ($frontendResults as $gameResult)
+                            <span class="ticker-item" data-slug="{{ $gameResult['slug'] }}">
+                                <span class="ticker-name">{{ \Illuminate\Support\Str::upper($gameResult['name']) }}</span>
+                                <span class="muted">→</span>
+                                @if (($gameResult['today'] ?? '--') !== '--')
+                                    <span class="ticker-num">{{ $gameResult['today'] }}</span>
+                                @else
+                                    <span class="ticker-wait">{{ $gameResult['time'] ?? '—' }}</span>
+                                @endif
+                                <span class="muted">|</span>
+                            </span>
+                        @endforeach
                     @endforeach
-                @empty
+                @else
                     <span class="ticker-item">No active games configured</span>
-                @endforelse
+                @endif
             </div></div>
             <span class="ticker-date" data-ticker-date>{{ now()->timezone(config('app.timezone'))->format('l, d M Y') }}</span>
         </div>
