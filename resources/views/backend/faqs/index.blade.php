@@ -35,12 +35,13 @@
                             <th>Answer</th>
                             <th>Platform</th>
                             <th>Visibility</th>
+                            <th>Scope</th>
                             <th>Order</th>
                             <th>Created At</th>
                             <th>Actions</th>
                         </tr>
                     </thead>
-                    <tfoot><tr><th>Serial</th><th>Question</th><th>Answer</th><th>Platform</th><th>Visibility</th><th>Order</th><th>Created At</th><th>Actions</th></tr></tfoot>
+                    <tfoot><tr><th>Serial</th><th>Question</th><th>Answer</th><th>Platform</th><th>Visibility</th><th>Scope</th><th>Order</th><th>Created At</th><th>Actions</th></tr></tfoot>
                     <tbody>
                         @foreach ($faqs as $faq)
                             <tr>
@@ -53,6 +54,7 @@
                                 </td>
                                 <td><span class="badge bg-secondary">{{ strtoupper($faq->platform ?? 'both') }}</span></td>
                                 <td><span class="badge {{ $faq->is_active ? 'bg-success' : 'bg-secondary' }}">{{ $faq->is_active ? 'Active' : 'Inactive' }}</span></td>
+                                <td>{{ $faq->page_slug ?: ($faq->game_id ? ($faq->game?->name ?? 'Game') : 'Global') }}</td>
                                 <td>{{ $faq->sort_order ?? 0 }}</td>
                                 <td>{{ $faq->created_at ? $faq->created_at->format('d M Y') : 'N/A' }}</td>
                                 <td>
