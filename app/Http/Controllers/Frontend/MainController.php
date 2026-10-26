@@ -51,7 +51,7 @@ class MainController extends Controller
             'yesterday',
         ])->all())->all();
         $homepageSections = HomePage::query()->where('status', 'active')->orderBy('id')->get(['id', 'title', 'content']);
-        $faqs = Faq::query()->latest('id')->get(['id', 'question', 'answer']);
+        $faqs = Faq::query()->where('is_active', true)->whereIn('platform', ['web', 'both'])->orderBy('sort_order')->orderBy('id')->get(['id', 'question', 'answer']);
         $publishedResultsQuery = Result::query()
             ->where('type', 'jodi')
             ->whereNotNull('game_date')
@@ -227,7 +227,7 @@ class MainController extends Controller
         $availableYears[] = $currentYear;
         $availableYears = array_values(array_unique(array_filter($availableYears, fn(int $availableYear) => $availableYear >= 2000 && $availableYear <= $currentYear)));
         rsort($availableYears);
-        $canonical = rtrim((string) app(AppSettingsService::class)->value('canonical_url', 'https://disawarbazaar.com'), '/')
+        $canonical = rtrim((string) app(AppSettingsService::class)->value('canonical_url', config('app.url', url('/'))), '/')
             . '/result/' . $game->slug;
 
         return response()
@@ -303,7 +303,7 @@ class MainController extends Controller
         ];
         abort_unless(isset($pages[$page]), 404);
         [$title, $copy] = $pages[$page];
-        $faqs = $page === 'faq' ? Faq::query()->latest('id')->get() : collect();
+        $faqs = $page === 'faq' ? Faq::query()->where('is_active', true)->whereIn('platform', ['web', 'both'])->orderBy('sort_order')->orderBy('id')->get() : collect();
 
         return view('frontend.information', compact('page', 'title', 'copy', 'faqs'));
     }
