@@ -65,9 +65,9 @@ class MainController extends Controller
         $monthLabel = $charts->monthLabel($selectedYear, $selectedMonth);
 
         $settings = app(AppSettingsService::class);
-        $siteName = trim((string) $settings->value('site_name', config('app.name', 'Disawar Bazaar')));
+        $siteName = trim((string) $settings->value('title', config('app.name', 'Disawar Bazaar')));
         $homeCanonical = rtrim((string) $settings->value('canonical_url', config('app.url', url('/'))), '/') . '/';
-        $homeDescription = trim((string) $settings->value('homepage_meta_description', $settings->value('meta_description', 'Browse published result records and historical monthly charts.')));
+        $homeDescription = trim((string) $settings->value('meta_description', 'Browse published result records and historical monthly charts.'));
         $homeGraph = [
             [
                 '@type' => 'WebSite',
@@ -76,7 +76,7 @@ class MainController extends Controller
             ],
             [
                 '@type' => 'WebPage',
-                'name' => trim((string) $settings->value('homepage_seo_title', $settings->value('seo_title', $siteName . ' | Results and Monthly Charts'))),
+                'name' => trim((string) $settings->value('meta_title', $siteName . ' | Results and Monthly Charts')),
                 'url' => $homeCanonical,
                 'description' => $homeDescription,
                 'isPartOf' => ['@type' => 'WebSite', 'name' => $siteName, 'url' => $homeCanonical],
