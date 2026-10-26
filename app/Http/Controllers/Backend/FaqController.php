@@ -30,6 +30,8 @@ class FaqController extends Controller
             'question' => ['required', 'string', 'max:500'],
             'answer' => ['required', 'string'],
             'platform' => ['required', 'in:web,app,both'],
+            'is_active' => ['required', 'boolean'],
+            'sort_order' => ['required', 'integer', 'min:0', 'max:100000'],
         ]);
         Faq::create($validated);
         $this->clearFaqCache();
