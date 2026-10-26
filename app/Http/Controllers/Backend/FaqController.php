@@ -4,9 +4,11 @@ namespace App\Http\Controllers\Backend;
 
 use App\Http\Controllers\Controller;
 use App\Models\Faq;
+use App\Models\Game;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Cache;
+use Illuminate\Validation\Rule;
 use Illuminate\View\View;
 
 class FaqController extends Controller
@@ -21,7 +23,8 @@ class FaqController extends Controller
     public function create(): View
     {
         $pageName = 'Create FAQ';
-        return view('backend.faqs.create', compact('pageName'));
+        $games = Game::query()->where('status', 'active')->orderBy('serial')->orderBy('name')->get(['id', 'name']);
+        return view('backend.faqs.create', compact('pageName', 'games'));
     }
 
     public function store(Request $request): RedirectResponse
@@ -32,6 +35,8 @@ class FaqController extends Controller
             'platform' => ['required', 'in:web,app,both'],
             'is_active' => ['required', 'boolean'],
             'sort_order' => ['required', 'integer', 'min:0', 'max:100000'],
+            'page_slug' => ['nullable', 'string', 'max:150', 'regex:/^[A-Za-z0-9-]+$/'],
+            'game_id' => ['nullable', 'integer', Rule::exists('games', 'id')->where(fn ($query) => $query->where('status', 'active')->whereNull('deleted_at'))],
         ]);
         Faq::create($validated);
         $this->clearFaqCache();
@@ -42,7 +47,8 @@ class FaqController extends Controller
     public function edit(Faq $faq): View
     {
         $pageName = 'Edit FAQ';
-        return view('backend.faqs.edit', compact('faq', 'pageName'));
+        $games = Game::query()->where('status', 'active')->orderBy('serial')->orderBy('name')->get(['id', 'name']);
+        return view('backend.faqs.edit', compact('faq', 'pageName', 'games'));
     }
 
     public function update(Request $request, Faq $faq): RedirectResponse
