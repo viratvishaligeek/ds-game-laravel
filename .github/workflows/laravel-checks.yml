@@ -37,8 +37,8 @@ jobs:
 
       - name: Prepare Laravel environment
         run: |
-          cp .env.example .env
-          php artisan key:generate
+          printf 'APP_NAME=Laravel\nAPP_ENV=testing\nAPP_KEY=\nAPP_DEBUG=true\nAPP_URL=http://localhost\nDB_CONNECTION=sqlite\nDB_DATABASE=:memory:\nCACHE_STORE=array\nSESSION_DRIVER=array\nQUEUE_CONNECTION=sync\nMAIL_MAILER=array\n' > .env
+          php artisan key:generate --force
 
       - name: Run automated tests
         run: php artisan test
