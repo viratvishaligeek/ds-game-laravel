@@ -31,6 +31,11 @@
         </table></div>
         <p class="muted small mt-3">A dash means no result is published for that date.</p>
         <p class="mt-4"><a class="btn" href="{{ route('charts.index', ['game_id' => $game->id, 'year' => $year, 'month' => $month]) }}">Open interactive charts</a></p>
+        @if ($faqs->isNotEmpty())
+            <section class="faq mt-5"><h2 class="h4">{{ $game->name }} FAQs</h2>
+                @foreach ($faqs as $faq)<details><summary>{{ $faq->question }}</summary><p class="muted">{{ $faq->answer }}</p></details>@endforeach
+            </section>
+        @endif
     </div>
 </section>
 @endsection
