@@ -69,7 +69,27 @@ class MainController extends Controller
         $siteName = trim((string) $settings->value('title', config('app.name', 'Disawar Bazaar')));
         $homeCanonical = rtrim((string) $settings->value('canonical_url', config('app.url', url('/'))), '/') . '/';
         $homeDescription = trim((string) $settings->value('meta_description', 'Browse published result records and historical monthly charts.'));
+        $organization = [
+            '@type' => 'Organization',
+            'name' => $siteName,
+            'url' => $homeCanonical,
+        ];
+        $logoName = trim((string) $settings->value('site_logo', ''));
+        if ($logoName !== '') {
+            $organization['logo'] = asset('logos/' . basename($logoName));
+        }
+        $contactPhone = trim((string) $settings->value('contact_phone', ''));
+        $contactEmail = trim((string) $settings->value('email', ''));
+        if ($contactPhone !== '' || $contactEmail !== '') {
+            $organization['contactPoint'] = array_filter([
+                '@type' => 'ContactPoint',
+                'telephone' => $contactPhone !== '' ? $contactPhone : null,
+                'email' => $contactEmail !== '' ? $contactEmail : null,
+                'contactType' => 'customer support',
+            ]);
+        }
         $homeGraph = [
+            $organization,
             [
                 '@type' => 'WebSite',
                 'name' => $siteName,
