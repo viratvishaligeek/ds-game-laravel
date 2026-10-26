@@ -2,6 +2,7 @@
 
 @section('meta_title', trim((string) ($page->meta_title ?? '')) !== '' ? $page->meta_title : $page->name . ' | ' . config('app.name'))
 @section('meta_description', trim((string) ($page->meta_description ?? '')) !== '' ? $page->meta_description : \Illuminate\Support\Str::limit(strip_tags((string) $page->content), 155))
+@section('meta_keywords', $page->meta_keywords ?? '')
 @section('meta_robots', ($page->noindex ?? false) ? 'noindex,follow' : (request()->query->count() ? 'noindex,follow' : 'index,follow'))
 
 @section('content')
