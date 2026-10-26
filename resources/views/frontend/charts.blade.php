@@ -15,7 +15,7 @@
             <div class="card-body"><div class="row g-3 align-items-end">
                 <div class="col-12 col-md-4"><label class="form-label" for="game_id">Game</label><select class="form-select" name="game_id" id="game_id"><option value="">All active games</option>@foreach ($games as $game)<option value="{{ $game->id }}" @selected((string)($selectedGameId ?? '') === (string)$game->id)>{{ $game->name }}</option>@endforeach</select></div>
                 <div class="col-6 col-md-3"><label class="form-label" for="year">Year</label><select class="form-select" name="year" id="year">@foreach ($availableYears as $availableYear)<option value="{{ $availableYear }}" @selected($year === $availableYear)>{{ $availableYear }}</option>@endforeach</select></div>
-                <div class="col-6 col-md-3"><label class="form-label" for="month">Month</label><select class="form-select" name="month" id="month">@foreach (range(1,12) as $monthNumber)<option value="{{ $monthNumber }}" @selected($month === $monthNumber)>{{ \Carbon\Carbon::create()->month($monthNumber)->format('F') }}</option>@endforeach</select></div>
+                <div class="col-6 col-md-3"><label class="form-label" for="month">Month</label><select class="form-select" name="month" id="month">@foreach (range(1,12) as $monthNumber)@if ($year < now()->timezone(config('app.timezone'))->year || $monthNumber <= now()->timezone(config('app.timezone'))->month)<option value="{{ $monthNumber }}" @selected($month === $monthNumber)>{{ \Carbon\Carbon::create()->month($monthNumber)->format('F') }}</option>@endif @endforeach</select></div>
                 <div class="col-12 col-md-2 d-grid"><button class="btn btn-primary" type="submit">Update chart</button></div>
             </div></div>
         </form>
