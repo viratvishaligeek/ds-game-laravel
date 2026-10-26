@@ -3,8 +3,8 @@
     $siteName = trim((string) $seoSettings->value('title', config('app.name', 'Disawar Bazaar')));
     $defaultTitle = trim((string) $seoSettings->value('meta_title', $siteName . ' | Results and Monthly Charts'));
     $defaultDescription = trim((string) $seoSettings->value('meta_description', 'Browse published result records and historical monthly charts.'));
-    $pageTitle = trim((string) $__env->yieldContent('meta_title', $defaultTitle));
-    $pageDescription = trim((string) $__env->yieldContent('meta_description', $defaultDescription));
+    $pageTitle = trim((string) $__env->yieldContent('meta_title', request()->routeIs('index') ? $seoSettings->value('homepage_meta_title', $defaultTitle) : $defaultTitle));
+    $pageDescription = trim((string) $__env->yieldContent('meta_description', request()->routeIs('index') ? $seoSettings->value('homepage_meta_description', $defaultDescription) : $defaultDescription));
     $configuredCanonicalBase = rtrim((string) $seoSettings->value('canonical_url', config('app.url', url('/'))), '/');
     $canonicalPath = request()->getPathInfo();
     $canonicalUrl = $configuredCanonicalBase . ($canonicalPath === '/' ? '/' : '/' . ltrim($canonicalPath, '/'));
@@ -17,6 +17,9 @@
     $faviconName = trim((string) $seoSettings->value('site_favicon', ''));
     $faviconUrl = $faviconName !== '' ? asset('logos/' . basename($faviconName)) : asset('frontend/images/favicon.png');
 @endphp
+@if (trim((string) $seoSettings->value('google_site_verification', '')) !== '')
+<meta name="google-site-verification" content="{{ trim((string) $seoSettings->value('google_site_verification')) }}">
+@endif
 <title>{{ $pageTitle !== '' ? $pageTitle : $defaultTitle }}</title>
 <meta name="description" content="{{ $pageDescription !== '' ? $pageDescription : $defaultDescription }}">
 <link rel="canonical" href="{{ $canonicalUrl }}">
