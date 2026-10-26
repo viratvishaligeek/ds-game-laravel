@@ -51,7 +51,7 @@
                         </div>
                         <div class="col-md-6 mb-3">
                             <input type="hidden" name="is_active" value="0">
-                            <div class="form-check mt-4"><input class="form-check-input" id="is_active" name="is_active" type="checkbox" value="1" {{ old('is_active', $faq->is_active ?? true) ? 'checked' : '' }}><label class="form-check-label" for="is_active">Active on website</label></div>
+                            <div class="form-check mt-4"><input class="form-check-input" id="is_active" name="is_active" type="checkbox" value="1" {{ filter_var(old('is_active', $faq->is_active ?? true), FILTER_VALIDATE_BOOLEAN) ? 'checked' : '' }}><label class="form-check-label" for="is_active">Active on website</label></div>
                         </div>
                         <div class="col-md-12 mb-3">
                             <label class="small mb-1" for="answer">Answer <span class="text-danger">*</span></label>
