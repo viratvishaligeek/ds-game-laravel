@@ -113,6 +113,91 @@ class MainController extends Controller
         ));
     }
 
+    public function charts(Request $request, MonthlyChartService $charts)
+    {
+        $now = now()->timezone(config('app.timezone'));
+        $filters = $request->validate([
+            'game_id' => ['sometimes', 'nullable', 'integer', 'exists:games,id'],
+            'year' => ['sometimes', 'nullable', 'regex:/^[0-9]{4}$/'],
+            'month' => ['sometimes', 'nullable', 'integer', 'between:1,12'],
+        ]);
+        $year = (int) ($filters['year'] ?? $now->year);
+        $month = (int) ($filters['month'] ?? $now->month);
+        abort_if($year < 2000 || $year > $now->year || ($year === $now->year && $month > $now->month), 404);
+
+        $games = Game::query()->where('status', 'active')->orderBy('serial')->orderBy('id')
+            ->get(['id', 'name', 'slug', 'serial']);
+        $selectedGameId = isset($filters['game_id']) && $filters['game_id'] !== '' ? (int) $filters['game_id'] : null;
+        if ($selectedGameId !== null) {
+            abort_unless($games->contains('id', $selectedGameId), 404);
+            $games = $games->where('id', $selectedGameId)->values();
+        }
+        [$start, $end, $dates] = $charts->monthDates($year, $month);
+        $rows = $charts->homepageRows($games, $start, $end, $dates)->groupBy(fn (array $row) => $row['date']->toDateString());
+        $chartRows = $rows->map(function ($dayRows) use ($games) {
+            $first = $dayRows->first();
+            $values = [];
+            foreach ($games as $game) {
+                $item = $dayRows->firstWhere('game.id', $game->id);
+                $values[$game->id] = $item['number'] ?? null;
+            }
+
+            return ['date' => $first['date'], 'values' => $values];
+        })->values();
+        $availableMonths = $charts->availableMonths($selectedGameId);
+        $availableYears = array_values(array_unique(array_merge([(int) $now->year], array_map('intval', array_keys($availableMonths)))));
+        rsort($availableYears);
+        $monthLabel = $charts->monthLabel($year, $month);
+        $publishedCount = Result::query()->where('type', 'jodi')
+            ->whereIn('game_id', $games->pluck('id'))
+            ->whereBetween('game_date', [$start->toDateString(), $end->toDateString()])
+            ->whereNotNull('number')->where('number', '<>', '')
+            ->whereDate('game_date', '<=', $now->toDateString())->count();
+
+        return view('frontend.charts', compact('games', 'selectedGameId', 'year', 'month', 'availableYears', 'monthLabel', 'chartRows', 'publishedCount'));
+    }
+
+    public function chartData(Request $request, MonthlyChartService $charts): JsonResponse
+    {
+        $now = now()->timezone(config('app.timezone'));
+        $filters = $request->validate([
+            'game_id' => ['sometimes', 'nullable', 'integer', 'exists:games,id'],
+            'year' => ['required', 'regex:/^[0-9]{4}$/'],
+            'month' => ['required', 'integer', 'between:1,12'],
+        ]);
+        $year = (int) $filters['year'];
+        $month = (int) $filters['month'];
+        abort_if($year < 2000 || $year > $now->year || ($year === $now->year && $month > $now->month), 404);
+
+        $games = Game::query()->where('status', 'active')->orderBy('serial')->orderBy('id')->get(['id', 'name', 'slug']);
+        if (!empty($filters['game_id'])) {
+            $games = $games->where('id', (int) $filters['game_id'])->values();
+            abort_if($games->isEmpty(), 404);
+        }
+        [$start, $end, $dates] = $charts->monthDates($year, $month);
+        $rows = $charts->homepageRows($games, $start, $end, $dates)->groupBy(fn (array $row) => $row['date']->toDateString());
+        $payloadRows = $rows->map(function ($dayRows) use ($games) {
+            $first = $dayRows->first();
+            $values = [];
+            foreach ($games as $game) {
+                $item = $dayRows->firstWhere('game.id', $game->id);
+                $values[] = [
+                    'game_id' => $game->id,
+                    'number' => $item['number'] ?? null,
+                    'status' => $item['status'] ?? 'pending',
+                ];
+            }
+
+            return ['date' => $first['date']->toDateString(), 'label' => $first['date']->format('d M'), 'values' => $values];
+        })->values();
+
+        return response()->json([
+            'month_label' => $charts->monthLabel($year, $month),
+            'games' => $games->map(fn (Game $game) => ['id' => $game->id, 'name' => $game->name, 'slug' => $game->slug])->values(),
+            'rows' => $payloadRows,
+        ])->header('Cache-Control', 'no-store');
+    }
+
     public function market(Request $request, string $slug, MonthlyChartService $charts)
     {
         $game = Game::query()->where('status', 'active')->where('slug', $slug)->firstOrFail();
