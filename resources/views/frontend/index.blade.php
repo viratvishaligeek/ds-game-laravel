@@ -20,9 +20,9 @@
                 <div class="hero-pill-wrap">
                     <div class="hero-pill" data-hero-pill>
                         <span class="dot"></span>
-                        <span class="kind">{{ ($featuredGame['today'] ?? '--') !== '--' ? 'Latest published result:' : 'Next result:' }}</span>
+                        <span class="kind">{{ ($featuredGame['latest_result'] ?? '--') !== '--' ? 'Latest published result:' : 'No published result:' }}</span>
                         <span class="name">{{ $featuredGame['name'] }}</span>
-                        <span class="extra">— {{ $featuredGame['time'] ?? 'Time not set' }}</span>
+                        <span class="extra">— {{ !empty($featuredGame['latest_result_date']) ? \Carbon\Carbon::parse($featuredGame['latest_result_date'])->format('d M Y') : ($featuredGame['time'] ?? 'Time not set') }}</span>
                     </div>
                 </div>
             @endif
@@ -49,12 +49,12 @@
         @if (!empty($featuredGame))
             <div class="live-box" data-live-box>
                 <div class="gname">{{ $featuredGame['name'] }}</div>
-                <div class="gnum">{{ ($featuredGame['today'] ?? '--') !== '--' ? $featuredGame['today'] : '--' }}</div>
-                <div class="sub">{{ ($featuredGame['today'] ?? '--') !== '--' ? "Today's published result" : 'No result published today' }}</div>
+                <div class="gnum">{{ ($featuredGame['latest_result'] ?? '--') !== '--' ? $featuredGame['latest_result'] : '—' }}</div>
+                <div class="sub">{{ !empty($featuredGame['latest_result_date']) ? 'Published ' . \Carbon\Carbon::parse($featuredGame['latest_result_date'])->format('d M Y') : 'No result record is available yet' }}</div>
                 <div class="upcoming">
                     <div class="gname">{{ $featuredGame['name'] }}</div>
-                    <div class="sub">Latest stored result</div>
-                    <div class="gname">{{ $featuredGame['time'] ?? 'Time not set' }}</div>
+                    <div class="sub">Today's result</div>
+                    <div class="gname">{{ ($featuredGame['today'] ?? '--') !== '--' ? $featuredGame['today'] : '—' }}</div>
                 </div>
             </div>
         @else
