@@ -49,20 +49,39 @@ class MainController extends Controller
             'today',
             'yesterday',
         ])->all())->all();
-        $recordYears = [$selectedYear];
-        $homepageSections = HomePage::query()->where('status', 'active')->orderBy('id')->get();
-        $faqs = Faq::query()->latest('id')->get();
+        $homepageSections = HomePage::query()->where('status', 'active')->orderBy('id')->get(['id', 'title', 'content']);
+        $faqs = Faq::query()->latest('id')->get(['id', 'question', 'answer']);
+        $publishedResultsQuery = Result::query()
+            ->where('type', 'jodi')
+            ->whereNotNull('game_date')
+            ->whereDate('game_date', '<=', $now->toDateString())
+            ->whereNotNull('number')
+            ->where('number', '<>', '')
+            ->whereHas('game', fn ($query) => $query->where('status', 'active'));
+        $publishedResultCount = (clone $publishedResultsQuery)->count();
+        $oldestResultDate = (clone $publishedResultsQuery)->min('game_date');
         $chunkSize = $charts->chunkSize();
         $monthlyTables = $charts->homepageTables($games, $monthStart, $monthEnd, $monthDays, $chunkSize);
         $monthLabel = $charts->monthLabel($selectedYear, $selectedMonth);
 
-        $homeCanonical = rtrim((string) app(AppSettingsService::class)->value('canonical_url', 'https://disawarbazaar.com'), '/') . '/';
-        $homeGraph = [[
-            '@type' => 'WebPage',
-            'name' => 'Disawar Bazaar | Satta King Results & Monthly Charts',
-            'url' => $homeCanonical,
-            'description' => app(AppSettingsService::class)->value('meta_description', 'Satta King result records and monthly charts on Disawar Bazaar.'),
-        ]];
+        $settings = app(AppSettingsService::class);
+        $siteName = trim((string) $settings->value('site_name', config('app.name', 'Disawar Bazaar')));
+        $homeCanonical = rtrim((string) $settings->value('canonical_url', config('app.url', url('/'))), '/') . '/';
+        $homeDescription = trim((string) $settings->value('homepage_meta_description', $settings->value('meta_description', 'Browse published result records and historical monthly charts.')));
+        $homeGraph = [
+            [
+                '@type' => 'WebSite',
+                'name' => $siteName,
+                'url' => $homeCanonical,
+            ],
+            [
+                '@type' => 'WebPage',
+                'name' => trim((string) $settings->value('homepage_seo_title', $settings->value('seo_title', $siteName . ' | Results and Monthly Charts'))),
+                'url' => $homeCanonical,
+                'description' => $homeDescription,
+                'isPartOf' => ['@type' => 'WebSite', 'name' => $siteName, 'url' => $homeCanonical],
+            ],
+        ];
         if ($faqs->isNotEmpty()) {
             $homeGraph[] = [
                 '@type' => 'FAQPage',
@@ -81,7 +100,6 @@ class MainController extends Controller
             'remainingFrontendResults',
             'featuredGame',
             'marketResults',
-            'recordYears',
             'homepageSections',
             'faqs',
             'monthlyTables',
@@ -89,7 +107,9 @@ class MainController extends Controller
             'chunkSize',
             'selectedYear',
             'selectedMonth',
-            'homeSchema'
+            'homeSchema',
+            'publishedResultCount',
+            'oldestResultDate'
         ));
     }
 
