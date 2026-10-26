@@ -35,3 +35,21 @@
     @endauth
 </div></section>
 @endsection
+
+@push('schema')
+    @php
+        $postSchema = [
+            '@context' => 'https://schema.org',
+            '@type' => 'Article',
+            'headline' => $post->title,
+            'articleBody' => strip_tags((string) $post->body),
+            'datePublished' => $post->created_at?->toIso8601String(),
+            'dateModified' => $post->updated_at?->toIso8601String(),
+            'mainEntityOfPage' => route('community.show', $post->id),
+        ];
+        if ($post->author?->name) {
+            $postSchema['author'] = ['@type' => 'Person', 'name' => $post->author->name];
+        }
+    @endphp
+    <script type="application/ld+json">{!! json_encode($postSchema, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE | JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_AMP | JSON_HEX_QUOT) !!}</script>
+@endpush
