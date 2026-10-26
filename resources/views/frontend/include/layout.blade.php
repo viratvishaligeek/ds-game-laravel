@@ -18,6 +18,7 @@
         }, 9000);
     </script>
     @yield('style')
+    @stack('schema')
 </head>
 
 <body>
