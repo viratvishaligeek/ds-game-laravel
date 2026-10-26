@@ -9,7 +9,6 @@
 
 @section('meta_title', $homeTitle)
 @section('meta_description', $homeDescription)
-@section('meta_robots', 'index,follow')
 
 @section('content')
     <section class="hero">
