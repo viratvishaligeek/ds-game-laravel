@@ -81,7 +81,14 @@
         event.preventDefault();
         load(link.href);
     });
-    window.addEventListener('popstate', () => load(window.location.href, false));
+    window.addEventListener('popstate', () => {
+        const params = new URLSearchParams(window.location.search);
+        ['game_id', 'year', 'month'].forEach(key => {
+            const field = form.elements.namedItem(key);
+            if (field) field.value = params.get(key) || '';
+        });
+        load(window.location.href, false);
+    });
 })();
 </script>
 @endsection
