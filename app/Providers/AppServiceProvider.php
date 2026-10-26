@@ -56,7 +56,7 @@ class AppServiceProvider extends ServiceProvider
                 $dateKeys = collect($dateMap)->flatMap(fn (array $dates) => array_values($dates))->unique()->values();
                 $results = Result::query()->whereIn('game_id', $games->pluck('id'))
                     ->where('type', 'jodi')->whereIn('game_date', $dateKeys)
-                    ->get(['game_id', 'game_date', 'number'])->groupBy('game_id');
+                    ->orderByDesc('id')->get(['game_id', 'game_date', 'number'])->groupBy('game_id');
                 $frontendResults = $games->map(function (Game $game) use ($results, $dateMap) {
                     $gameResults = $results->get($game->id, collect());
                     $todayResult = $gameResults->firstWhere('game_date', $dateMap[$game->id]['today'])?->number;
