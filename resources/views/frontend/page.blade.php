@@ -10,6 +10,11 @@
         <h1>{{ $page->name }}</h1>
         <div class="cms-page-content">{{ $page->content }}</div>
     </article>
+    @if ($faqs->isNotEmpty())
+        <section class="faq mt-4"><h2 class="h4">Frequently Asked Questions</h2>
+            @foreach ($faqs as $faq)<details><summary>{{ $faq->question }}</summary><p class="muted">{{ $faq->answer }}</p></details>@endforeach
+        </section>
+    @endif
 </div></section>
 @endsection
 
