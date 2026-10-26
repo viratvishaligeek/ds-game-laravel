@@ -5,6 +5,10 @@
     $siteName = trim((string) $settings->value('title', config('app.name', 'Disawar Bazaar')));
     $homeTitle = trim((string) $settings->value('homepage_meta_title', $settings->value('meta_title', $siteName . ' | Results and Monthly Charts')));
     $homeDescription = trim((string) $settings->value('homepage_meta_description', $settings->value('meta_description', 'Browse published result records and historical monthly charts.')));
+    $heroLine1 = trim((string) $settings->value('homepage_heading_line1', '')) ?: $siteName . ' –';
+    $heroLine2 = trim((string) $settings->value('homepage_heading_line2', '')) ?: 'Historical Records';
+    $heroLine3 = trim((string) $settings->value('homepage_heading_line3', '')) ?: '& Monthly Charts';
+    $heroIntroduction = trim((string) $settings->value('homepage_intro', '')) ?: 'Welcome to ' . $siteName . ', your online source for market-wise result information and historical records. Explore previous results, monthly charts and year-wise records, with published updates available in one convenient place.';
 @endphp
 
 @section('meta_title', $homeTitle)
@@ -17,11 +21,11 @@
                 <div class="col-lg-7">
                     <span class="d-inline-flex align-items-center gap-2 text-uppercase fw-semibold small mb-3"><i class="bi bi-bar-chart-line-fill" aria-hidden="true"></i> Market history and published records</span>
                     <h1 id="home-intro-title" class="display-4 fw-bold lh-sm mb-3">
-                        {{ trim((string) $settings->value('homepage_heading_line1', $siteName . ' –')) }}
-                        <span class="d-block">{{ trim((string) $settings->value('homepage_heading_line2', 'Historical Records')) }}</span>
-                        <span class="d-block">{{ trim((string) $settings->value('homepage_heading_line3', '& Monthly Charts')) }}</span>
+                        {{ $heroLine1 }}
+                        <span class="d-block">{{ $heroLine2 }}</span>
+                        <span class="d-block">{{ $heroLine3 }}</span>
                     </h1>
-                    <p class="lead mb-4">{{ trim((string) $settings->value('homepage_intro', 'Welcome to ' . $siteName . ', your online source for market-wise result information and historical records. Explore previous results, monthly charts and year-wise records, with published updates available in one convenient place.')) }}</p>
+                    <p class="lead mb-4">{{ $heroIntroduction }}</p>
                     <div class="d-flex flex-column flex-sm-row align-items-sm-center gap-3">
                         @if (!empty($appDownloadUrl))
                             <a class="btn btn-primary btn-lg d-inline-flex align-items-center justify-content-center gap-2" href="{{ $appDownloadUrl }}" target="_blank" rel="noopener noreferrer">
