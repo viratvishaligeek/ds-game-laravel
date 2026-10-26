@@ -11,6 +11,7 @@ use App\Models\Result;
 use App\Services\AppSettingsService;
 use App\Services\MonthlyChartService;
 use Carbon\Carbon;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 
 class MainController extends Controller
