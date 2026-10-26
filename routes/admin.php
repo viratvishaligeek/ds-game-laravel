@@ -17,7 +17,6 @@ use App\Http\Controllers\Backend\PushNotificationController;
 use App\Http\Controllers\Backend\SettingController;
 use App\Http\Controllers\Backend\SupportChatController;
 use App\Http\Controllers\Backend\AdminPushSubscriptionController;
-use App\Http\Controllers\Backend\NotificationSoundController;
 use App\Http\Controllers\Backend\User\MemberController;
 use App\Http\Controllers\Backend\User\RoleController;
 use App\Http\Controllers\Backend\User\UserController;
