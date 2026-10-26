@@ -27,6 +27,9 @@
         @yield('content')
     </main>
     @include('frontend.include.footer')
+    @if (request()->routeIs('index') && isset($homepageSections))
+        @include('frontend.include.homepage-sections', ['sections' => $homepageSections->get('after_footer', collect())])
+    @endif
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js" integrity="sha384-FKyoEForCGlyvwx9Hj09JcYn3nv7wiPVlz7YYwJrWVcXK/BmnVDxM+D2scQbITxI" crossorigin="anonymous"></script>
     <script src="{{ URL::asset('frontend') }}/js/app.js"></script>
     @yield('script')
