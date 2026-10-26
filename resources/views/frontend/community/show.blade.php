@@ -13,7 +13,7 @@
         <div class="community-post-body">{{ $post->body }}</div>
     </div></article>
     <h2 class="h4">Replies ({{ $post->replies_count }})</h2>
-    @forelse ($post->replies as $reply)
+    @forelse ($replies as $reply)
         <article class="card mb-3"><div class="card-body">
             <p class="mb-2">{{ $reply->body }}</p>
             <div class="small text-body-secondary">{{ $reply->author?->name ?? 'Community member' }} · {{ $reply->created_at?->timezone(config('app.timezone'))->format('d M Y, h:i A') }}</div>
@@ -21,6 +21,7 @@
     @empty
         <p class="text-body-secondary">No replies yet.</p>
     @endforelse
+    <div class="mt-3">{{ $replies->links() }}</div>
     @auth('web')
         <form class="card mt-4" method="POST" action="{{ route('community.reply', $post->id) }}"><div class="card-body">
             @csrf
