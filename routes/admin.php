@@ -11,6 +11,7 @@ use App\Http\Controllers\Backend\Game\ResultController;
 use App\Http\Controllers\Backend\Game\WinnerController;
 use App\Http\Controllers\Backend\HomePageController;
 use App\Http\Controllers\Backend\MobileAppController;
+use App\Http\Controllers\Backend\NotificationSoundController;
 use App\Http\Controllers\Backend\PagesController;
 use App\Http\Controllers\Backend\PushNotificationController;
 use App\Http\Controllers\Backend\SettingController;
@@ -38,6 +39,8 @@ Route::group(['prefix' => 'admin', 'as' => 'admin.', 'middleware' => ['auth:admi
     Route::patch('guessing/{post}/moderate', [CommunityModerationController::class, 'update'])->name('guessing.moderate');
     Route::post('guessing/policy', [CommunityModerationController::class, 'updatePolicy'])->name('guessing.policy');
     Route::get('push-notifications', [PushNotificationController::class, 'index'])->name('push-notifications.index');
+    Route::get('notification-sounds', [NotificationSoundController::class, 'index'])->name('notification-sounds.index');
+    Route::post('notification-sounds', [NotificationSoundController::class, 'update'])->name('notification-sounds.update');
 
     Route::post('push-subscribe', [AdminPushSubscriptionController::class, 'subscribe'])->name('push-subscribe');
     Route::delete('push-subscribe', [AdminPushSubscriptionController::class, 'unsubscribe'])->name('push-unsubscribe');
