@@ -21,7 +21,7 @@
     @empty
         <p class="text-body-secondary">No replies yet.</p>
     @endforelse
-    <div class="mt-3">{{ $replies->links() }}</div>
+    <div class="mt-3">{{ $replies->links('pagination::bootstrap-5') }}</div>
     @auth('web')
         <form class="card mt-4" method="POST" action="{{ route('community.reply', $post->id) }}"><div class="card-body">
             @csrf
