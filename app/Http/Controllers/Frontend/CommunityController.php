@@ -20,7 +20,7 @@ class CommunityController extends Controller
     public function index(Request $request): View|JsonResponse
     {
         $filters = $request->validate([
-            'game_id' => ['sometimes', 'nullable', 'integer', Rule::exists('games', 'id')->where(fn ($query) => $query->where('status', 'active')->whereNull('deleted_at'))],
+            'game_id' => ['sometimes', 'nullable', 'integer', Rule::exists('games', 'id')->where(fn ($query) => $query->where('status', 'active')->whereNull('deleted_at')->where('site_key', config('sites.current_key', config('sites.default', 'disawar-bazaar'))))],
             'year' => ['sometimes', 'nullable', 'integer', 'between:2000,' . now()->timezone(config('app.timezone'))->year],
             'month' => ['sometimes', 'nullable', 'integer', 'between:1,12'],
         ]);
@@ -97,7 +97,7 @@ class CommunityController extends Controller
     public function store(Request $request): RedirectResponse
     {
         $data = $request->validate([
-            'game_id' => ['required', 'integer', Rule::exists('games', 'id')->where(fn($query) => $query->where('status', 'active')->whereNull('deleted_at'))],
+            'game_id' => ['required', 'integer', Rule::exists('games', 'id')->where(fn($query) => $query->where('status', 'active')->whereNull('deleted_at')->where('site_key', config('sites.current_key', config('sites.default', 'disawar-bazaar'))))],
             'title' => ['required', 'string', 'min:4', 'max:120'],
             'body' => ['required', 'string', 'min:10', 'max:5000'],
         ]);
