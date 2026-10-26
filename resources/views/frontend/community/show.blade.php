@@ -2,6 +2,7 @@
 
 @section('meta_title', $post->title . ' | Community')
 @section('meta_description', \Illuminate\Support\Str::limit(strip_tags($post->body), 155))
+@section('og_type', 'article')
 
 @section('content')
 <section class="section"><div class="wrap" style="max-width:900px">
