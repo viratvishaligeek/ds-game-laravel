@@ -97,7 +97,14 @@ class HomepageLayoutRegressionTest extends TestCase
         $response->assertOk()
             ->assertSee('Market Beta')
             ->assertSee('456')
-            ->assertSee('/result/market-beta')
-            ->assertDontSee('Disawar Bazaar', false);
+            ->assertSee('/result/market-beta');
+
+        $html = $response->getContent();
+        $featuredStart = strpos($html, 'class="live-hero"');
+        $featuredEnd = strpos($html, '<section class="hero"', $featuredStart);
+        $featuredHtml = substr($html, $featuredStart, $featuredEnd - $featuredStart);
+        $this->assertStringContainsString('Market Beta', $featuredHtml);
+        $this->assertStringContainsString('456', $featuredHtml);
+        $this->assertStringNotContainsString('Market Alpha', $featuredHtml);
     }
 }
