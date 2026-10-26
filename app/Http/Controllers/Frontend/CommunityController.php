@@ -102,11 +102,12 @@ class CommunityController extends Controller
     {
         $post = CommunityPost::query()
             ->where('status', 'approved')
-            ->with(['game:id,name,slug', 'author:id,name', 'replies.author:id,name'])
+            ->with(['game:id,name,slug', 'author:id,name'])
             ->withCount('replies')
             ->findOrFail($post);
+        $replies = $post->replies()->with('author:id,name')->paginate(20);
 
-        return view('frontend.community.show', compact('post'));
+        return view('frontend.community.show', compact('post', 'replies'));
     }
 
     public function reply(Request $request, int $post): RedirectResponse
