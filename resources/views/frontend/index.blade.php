@@ -2,8 +2,8 @@
 
 @php
     $settings = app(\App\Services\AppSettingsService::class);
-    $siteName = trim((string) $settings->value('site_name', config('app.name', 'Disawar Bazaar')));
-    $homeTitle = trim((string) $settings->value('homepage_seo_title', $settings->value('seo_title', $siteName . ' | Results and Monthly Charts')));
+    $siteName = trim((string) $settings->value('title', config('app.name', 'Disawar Bazaar')));
+    $homeTitle = trim((string) $settings->value('homepage_meta_title', $settings->value('meta_title', $siteName . ' | Results and Monthly Charts')));
     $homeDescription = trim((string) $settings->value('homepage_meta_description', $settings->value('meta_description', 'Browse published result records and historical monthly charts.')));
 @endphp
 
