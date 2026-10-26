@@ -336,7 +336,7 @@ class MainController extends Controller
         $businessDates = $this->businessDatesFor($games, $now);
         $resultDates = collect($businessDates)->flatMap(fn(array $dates) => array_values($dates))->unique()->values();
         $results = Result::query()->whereIn('game_id', $games->pluck('id'))->where('type', 'jodi')
-            ->whereIn('game_date', $resultDates)->get(['game_id', 'game_date', 'number'])->groupBy('game_id');
+            ->whereIn('game_date', $resultDates)->orderByDesc('id')->get(['game_id', 'game_date', 'number'])->groupBy('game_id');
         $latestPublishedAt = Result::query()
             ->whereIn('game_id', $games->pluck('id'))
             ->where('type', 'jodi')
