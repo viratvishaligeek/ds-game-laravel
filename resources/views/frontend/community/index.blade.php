@@ -1,6 +1,6 @@
 @extends('frontend.include.layout')
 
-@section('meta_title', 'Community Discussions | ' . config('app.name'))
+@section('meta_title', 'Community Discussions | ' . app(\App\Services\AppSettingsService::class)->value('title', config('app.name')))
 @section('meta_description', 'Browse approved community discussions, filter by game and date, and join the conversation.')
 
 @section('content')
