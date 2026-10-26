@@ -11,4 +11,6 @@ class Faq extends Model
     protected $primaryKey = 'id';
     public $timestamps = true;
     protected $guarded = ['id'];
+
+    protected $casts = ['is_active' => 'boolean', 'sort_order' => 'integer'];
 }
