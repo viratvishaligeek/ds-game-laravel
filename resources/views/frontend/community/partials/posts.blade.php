@@ -20,4 +20,4 @@
         <p class="text-body-secondary mb-0">Try another game or date range, or check back after a post is approved.</p>
     </div></div>
 @endforelse
-<div class="mt-4">{{ $posts->links() }}</div>
+<div class="mt-4">{{ $posts->links('pagination::bootstrap-5') }}</div>
