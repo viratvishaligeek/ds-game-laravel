@@ -20,8 +20,10 @@ class SupportFaqController extends Controller
         $siteKey = (string) config('sites.current_key', config('sites.default', 'disawar-bazaar'));
         $faqs = Cache::remember("support-faqs:{$siteKey}:{$platform}", now()->addMinutes(5), function () use ($platform) {
             return Faq::query()
+                ->where('is_active', true)
+                ->whereNull('page_slug')->whereNull('game_id')
                 ->whereIn('platform', [$platform, 'both'])
-                ->orderBy('id')
+                ->orderBy('sort_order')->orderBy('id')
                 ->get(['id', 'question', 'answer', 'platform'])
                 ->map(fn (Faq $faq) => [
                     'id' => $faq->id,

@@ -5,7 +5,6 @@ use App\Models\CommunityPost;
 use App\Models\Page;
 use App\Models\Result;
 use App\Services\AppSettingsService;
-use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/firebase-config.js', function () {
@@ -26,6 +25,7 @@ Route::get('/firebase-config.js', function () {
         'Cache-Control' => 'no-store, max-age=0',
     ]);
 });
+
 Route::get('/firebase-config.json', function () {
     $web = config('services.fcm_web');
 
@@ -39,47 +39,13 @@ Route::get('/firebase-config.json', function () {
     ])->header('Cache-Control', 'no-store, max-age=0');
 });
 
-Route::get('/optimize-clear', function () {
-    Artisan::call('optimize:clear');
-
-    return response()->json([
-        'success' => true,
-        'message' => 'Application cache cleared successfully.',
-    ]);
-});
-
-Route::get('/storage-link', function () {
-    Artisan::call('storage:link');
-
-    return response()->json([
-        'success' => true,
-        'message' => 'Storage link created successfully.',
-    ]);
-});
-
-
-Route::get('/storage-link', function () {
-    Artisan::call('migrate --force');
-    return response()->json([
-        'success' => true,
-        'message' => 'Forcly Migrated Successfully.',
-    ]);
-});
-
-
-Route::get('/fresh-db', function () {
-    Artisan::call('migrate:fresh');
-    Artisan::call('db:seed');
-    Artisan::call('permissions:setup');
-    return response()->json([
-        'success' => true,
-        'message' => 'New Migration, New Seed, New Permissions setuped successfully.',
-    ]);
-});
-
 $buildPublicSitemapEntries = function (): array {
-    $base = rtrim((string) app(AppSettingsService::class)->value('canonical_url', config('app.url', 'https://disawarbazaar.com')), '/');
-    $entries = [$base . '/' => null];
+    $base = rtrim((string) app(AppSettingsService::class)->value('canonical_url', config('app.url', '')), '/');
+    if ($base === '') {
+        $base = rtrim((string) url('/'), '/');
+    }
+
+    $entries = [$base . '/' => null, $base . '/charts' => null];
     foreach (['about', 'contact', 'faq', 'privacy-policy', 'terms-and-conditions', 'disclaimer'] as $informationSlug) {
         $entries[$base . '/' . $informationSlug] = null;
     }
@@ -137,6 +103,31 @@ $renderSitemapUrlSet = function (array $entries) {
     return response($xml, 200)->header('Content-Type', 'application/xml; charset=UTF-8');
 };
 
+Route::get('/robots.txt', function () {
+    $base = rtrim((string) app(AppSettingsService::class)->value('canonical_url', config('app.url', '')), '/');
+    if ($base === '') {
+        $base = rtrim((string) url('/'), '/');
+    }
+
+    $content = implode("\n", [
+        'User-agent: *',
+        'Allow: /',
+        'Disallow: /admin/',
+        'Disallow: /login',
+        'Disallow: /firebase-config.js',
+        'Disallow: /firebase-config.json',
+        'Disallow: /community/login',
+        'Disallow: /community/register',
+        'Disallow: /community/guessing/create',
+        'Disallow: /charts/data',
+        'Disallow: /get_result',
+        'Sitemap: ' . $base . '/sitemap.xml',
+        '',
+    ]);
+
+    return response($content, 200)->header('Content-Type', 'text/plain; charset=UTF-8');
+})->name('robots');
+
 Route::get('/sitemap-{part}.xml', function (string $part) use ($buildPublicSitemapEntries, $renderSitemapUrlSet) {
     abort_unless(ctype_digit($part) && (int) $part >= 1, 404);
     $entries = $buildPublicSitemapEntries();
@@ -153,7 +144,11 @@ Route::get('/sitemap.xml', function () use ($buildPublicSitemapEntries, $renderS
         return $renderSitemapUrlSet($entries);
     }
 
-    $base = rtrim((string) app(AppSettingsService::class)->value('canonical_url', config('app.url', 'https://disawarbazaar.com')), '/');
+    $base = rtrim((string) app(AppSettingsService::class)->value('canonical_url', config('app.url', '')), '/');
+    if ($base === '') {
+        $base = rtrim((string) url('/'), '/');
+    }
+
     $xml = '<?xml version="1.0" encoding="UTF-8"?>' . "\n" . '<sitemapindex xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">';
     foreach (array_keys($chunks) as $index) {
         $xml .= '<sitemap><loc>' . htmlspecialchars($base . '/sitemap-' . ($index + 1) . '.xml', ENT_XML1 | ENT_QUOTES, 'UTF-8') . '</loc></sitemap>';

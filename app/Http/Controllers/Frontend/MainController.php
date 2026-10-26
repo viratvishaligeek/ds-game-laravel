@@ -11,6 +11,7 @@ use App\Models\Result;
 use App\Services\AppSettingsService;
 use App\Services\MonthlyChartService;
 use Carbon\Carbon;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 
 class MainController extends Controller
@@ -49,20 +50,59 @@ class MainController extends Controller
             'today',
             'yesterday',
         ])->all())->all();
-        $recordYears = [$selectedYear];
-        $homepageSections = HomePage::query()->where('status', 'active')->orderBy('id')->get();
-        $faqs = Faq::query()->latest('id')->get();
+        $homepageSections = HomePage::query()->where('status', 'active')->orderBy('id')->get(['id', 'title', 'content']);
+        $faqs = Faq::query()->where('is_active', true)->whereIn('platform', ['web', 'both'])->whereNull('page_slug')->whereNull('game_id')->orderBy('sort_order')->orderBy('id')->get(['id', 'question', 'answer']);
+        $publishedResultsQuery = Result::query()
+            ->where('type', 'jodi')
+            ->whereNotNull('game_date')
+            ->whereDate('game_date', '<=', $now->toDateString())
+            ->whereNotNull('number')
+            ->where('number', '<>', '')
+            ->whereHas('game', fn ($query) => $query->where('status', 'active'));
+        $publishedResultCount = (clone $publishedResultsQuery)->count();
+        $oldestResultDate = (clone $publishedResultsQuery)->min('game_date');
         $chunkSize = $charts->chunkSize();
         $monthlyTables = $charts->homepageTables($games, $monthStart, $monthEnd, $monthDays, $chunkSize);
         $monthLabel = $charts->monthLabel($selectedYear, $selectedMonth);
 
-        $homeCanonical = rtrim((string) app(AppSettingsService::class)->value('canonical_url', 'https://disawarbazaar.com'), '/') . '/';
-        $homeGraph = [[
-            '@type' => 'WebPage',
-            'name' => 'Disawar Bazaar | Satta King Results & Monthly Charts',
+        $settings = app(AppSettingsService::class);
+        $siteName = trim((string) $settings->value('title', config('app.name', 'Disawar Bazaar')));
+        $homeCanonical = rtrim((string) $settings->value('canonical_url', config('app.url', url('/'))), '/') . '/';
+        $homeDescription = trim((string) $settings->value('homepage_meta_description', $settings->value('meta_description', 'Browse published result records and historical monthly charts.')));
+        $organization = [
+            '@type' => 'Organization',
+            'name' => $siteName,
             'url' => $homeCanonical,
-            'description' => app(AppSettingsService::class)->value('meta_description', 'Satta King result records and monthly charts on Disawar Bazaar.'),
-        ]];
+        ];
+        $logoName = trim((string) $settings->value('site_logo', ''));
+        if ($logoName !== '') {
+            $organization['logo'] = asset('logos/' . basename($logoName));
+        }
+        $contactPhone = trim((string) $settings->value('contact_phone', ''));
+        $contactEmail = trim((string) $settings->value('email', ''));
+        if ($contactPhone !== '' || $contactEmail !== '') {
+            $organization['contactPoint'] = array_filter([
+                '@type' => 'ContactPoint',
+                'telephone' => $contactPhone !== '' ? $contactPhone : null,
+                'email' => $contactEmail !== '' ? $contactEmail : null,
+                'contactType' => 'customer support',
+            ]);
+        }
+        $homeGraph = [
+            $organization,
+            [
+                '@type' => 'WebSite',
+                'name' => $siteName,
+                'url' => $homeCanonical,
+            ],
+            [
+                '@type' => 'WebPage',
+                'name' => trim((string) $settings->value('homepage_meta_title', $settings->value('meta_title', $siteName . ' | Results and Monthly Charts'))),
+                'url' => $homeCanonical,
+                'description' => $homeDescription,
+                'isPartOf' => ['@type' => 'WebSite', 'name' => $siteName, 'url' => $homeCanonical],
+            ],
+        ];
         if ($faqs->isNotEmpty()) {
             $homeGraph[] = [
                 '@type' => 'FAQPage',
@@ -81,7 +121,6 @@ class MainController extends Controller
             'remainingFrontendResults',
             'featuredGame',
             'marketResults',
-            'recordYears',
             'homepageSections',
             'faqs',
             'monthlyTables',
@@ -89,8 +128,95 @@ class MainController extends Controller
             'chunkSize',
             'selectedYear',
             'selectedMonth',
-            'homeSchema'
+            'homeSchema',
+            'publishedResultCount',
+            'oldestResultDate'
         ));
+    }
+
+    public function charts(Request $request, MonthlyChartService $charts)
+    {
+        $now = now()->timezone(config('app.timezone'));
+        $filters = $request->validate([
+            'game_id' => ['sometimes', 'nullable', 'integer', 'exists:games,id'],
+            'year' => ['sometimes', 'nullable', 'regex:/^[0-9]{4}$/'],
+            'month' => ['sometimes', 'nullable', 'integer', 'between:1,12'],
+        ]);
+        $year = (int) ($filters['year'] ?? $now->year);
+        $month = (int) ($filters['month'] ?? $now->month);
+        abort_if($year < 2000 || $year > $now->year || ($year === $now->year && $month > $now->month), 404);
+
+        $games = Game::query()->where('status', 'active')->orderBy('serial')->orderBy('id')
+            ->get(['id', 'name', 'slug', 'serial']);
+        $selectedGameId = isset($filters['game_id']) && $filters['game_id'] !== '' ? (int) $filters['game_id'] : null;
+        if ($selectedGameId !== null) {
+            abort_unless($games->contains('id', $selectedGameId), 404);
+            $games = $games->where('id', $selectedGameId)->values();
+        }
+        [$start, $end, $dates] = $charts->monthDates($year, $month);
+        $rows = $charts->homepageRows($games, $start, $end, $dates)->groupBy(fn (array $row) => $row['date']->toDateString());
+        $chartRows = $rows->map(function ($dayRows) use ($games) {
+            $first = $dayRows->first();
+            $values = [];
+            foreach ($games as $game) {
+                $item = $dayRows->firstWhere('game.id', $game->id);
+                $values[$game->id] = $item['number'] ?? null;
+            }
+
+            return ['date' => $first['date'], 'values' => $values];
+        })->values();
+        $availableMonths = $charts->availableMonths($selectedGameId);
+        $availableYears = array_values(array_unique(array_merge([(int) $now->year], array_map('intval', array_keys($availableMonths)))));
+        rsort($availableYears);
+        $monthLabel = $charts->monthLabel($year, $month);
+        $publishedCount = Result::query()->where('type', 'jodi')
+            ->whereIn('game_id', $games->pluck('id'))
+            ->whereBetween('game_date', [$start->toDateString(), $end->toDateString()])
+            ->whereNotNull('number')->where('number', '<>', '')
+            ->whereDate('game_date', '<=', $now->toDateString())->count();
+
+        return view('frontend.charts', compact('games', 'selectedGameId', 'year', 'month', 'availableYears', 'monthLabel', 'chartRows', 'publishedCount'));
+    }
+
+    public function chartData(Request $request, MonthlyChartService $charts): JsonResponse
+    {
+        $now = now()->timezone(config('app.timezone'));
+        $filters = $request->validate([
+            'game_id' => ['sometimes', 'nullable', 'integer', 'exists:games,id'],
+            'year' => ['required', 'regex:/^[0-9]{4}$/'],
+            'month' => ['required', 'integer', 'between:1,12'],
+        ]);
+        $year = (int) $filters['year'];
+        $month = (int) $filters['month'];
+        abort_if($year < 2000 || $year > $now->year || ($year === $now->year && $month > $now->month), 404);
+
+        $games = Game::query()->where('status', 'active')->orderBy('serial')->orderBy('id')->get(['id', 'name', 'slug']);
+        if (!empty($filters['game_id'])) {
+            $games = $games->where('id', (int) $filters['game_id'])->values();
+            abort_if($games->isEmpty(), 404);
+        }
+        [$start, $end, $dates] = $charts->monthDates($year, $month);
+        $rows = $charts->homepageRows($games, $start, $end, $dates)->groupBy(fn (array $row) => $row['date']->toDateString());
+        $payloadRows = $rows->map(function ($dayRows) use ($games) {
+            $first = $dayRows->first();
+            $values = [];
+            foreach ($games as $game) {
+                $item = $dayRows->firstWhere('game.id', $game->id);
+                $values[] = [
+                    'game_id' => $game->id,
+                    'number' => $item['number'] ?? null,
+                    'status' => $item['status'] ?? 'pending',
+                ];
+            }
+
+            return ['date' => $first['date']->toDateString(), 'label' => $first['date']->format('d M'), 'values' => $values];
+        })->values();
+
+        return response()->json([
+            'month_label' => $charts->monthLabel($year, $month),
+            'games' => $games->map(fn (Game $game) => ['id' => $game->id, 'name' => $game->name, 'slug' => $game->slug])->values(),
+            'rows' => $payloadRows,
+        ])->header('Cache-Control', 'no-store');
     }
 
     public function market(Request $request, string $slug, MonthlyChartService $charts)
@@ -121,11 +247,16 @@ class MainController extends Controller
         $availableYears[] = $currentYear;
         $availableYears = array_values(array_unique(array_filter($availableYears, fn(int $availableYear) => $availableYear >= 2000 && $availableYear <= $currentYear)));
         rsort($availableYears);
-        $canonical = rtrim((string) app(AppSettingsService::class)->value('canonical_url', 'https://disawarbazaar.com'), '/')
+        $canonical = rtrim((string) app(AppSettingsService::class)->value('canonical_url', config('app.url', url('/'))), '/')
             . '/result/' . $game->slug;
+        $faqs = Faq::query()->where('is_active', true)->whereIn('platform', ['web', 'both'])
+            ->where(function ($query) use ($game) {
+                $query->where(fn ($scope) => $scope->whereNull('page_slug')->whereNull('game_id'))
+                    ->orWhere('game_id', $game->id);
+            })->orderBy('sort_order')->orderBy('id')->get(['id', 'question', 'answer']);
 
         return response()
-            ->view('frontend.market', compact('game', 'year', 'month', 'monthLabel', 'results', 'canonical', 'currentYear', 'currentMonth', 'availableYears'))
+            ->view('frontend.market', compact('game', 'year', 'month', 'monthLabel', 'results', 'canonical', 'currentYear', 'currentMonth', 'availableYears', 'faqs'))
             ->header('X-Robots-Tag', $request->query->count() > 0 ? 'noindex, follow' : 'index, follow');
     }
 
@@ -171,7 +302,13 @@ class MainController extends Controller
     {
         $page = Page::query()->where('slug', $slug)->where('status', 'active')->firstOrFail();
 
-        return view('frontend.page', compact('page'));
+        $faqs = Faq::query()->where('is_active', true)->whereIn('platform', ['web', 'both'])
+            ->where(function ($query) use ($page) {
+                $query->where(fn ($scope) => $scope->whereNull('page_slug')->whereNull('game_id'))
+                    ->orWhere('page_slug', $page->slug);
+            })->orderBy('sort_order')->orderBy('id')->get(['id', 'question', 'answer']);
+
+        return view('frontend.page', compact('page', 'faqs'));
     }
 
     public function information(string $page)
@@ -197,7 +334,7 @@ class MainController extends Controller
         ];
         abort_unless(isset($pages[$page]), 404);
         [$title, $copy] = $pages[$page];
-        $faqs = $page === 'faq' ? Faq::query()->latest('id')->get() : collect();
+        $faqs = $page === 'faq' ? Faq::query()->where('is_active', true)->whereIn('platform', ['web', 'both'])->where(function ($query) { $query->where(fn ($scope) => $scope->whereNull('page_slug')->whereNull('game_id'))->orWhere('page_slug', 'faq'); })->orderBy('sort_order')->orderBy('id')->get() : collect();
 
         return view('frontend.information', compact('page', 'title', 'copy', 'faqs'));
     }
@@ -210,7 +347,19 @@ class MainController extends Controller
         $businessDates = $this->businessDatesFor($games, $now);
         $resultDates = collect($businessDates)->flatMap(fn(array $dates) => array_values($dates))->unique()->values();
         $results = Result::query()->whereIn('game_id', $games->pluck('id'))->where('type', 'jodi')
-            ->whereIn('game_date', $resultDates)->get(['game_id', 'game_date', 'number'])->groupBy('game_id');
+            ->whereIn('game_date', $resultDates)->orderByDesc('id')->get(['game_id', 'game_date', 'number'])->groupBy('game_id');
+        $latestPublishedResults = Result::query()
+            ->whereIn('game_id', $games->pluck('id'))
+            ->where('type', 'jodi')
+            ->whereNotNull('game_date')
+            ->whereDate('game_date', '<=', $now->toDateString())
+            ->whereNotNull('number')
+            ->where('number', '<>', '')
+            ->orderByDesc('game_date')
+            ->orderByDesc('id')
+            ->get(['id', 'game_id', 'game_date', 'number'])
+            ->unique('game_id')
+            ->keyBy('game_id');
         $latestPublishedAt = Result::query()
             ->whereIn('game_id', $games->pluck('id'))
             ->where('type', 'jodi')
@@ -222,11 +371,12 @@ class MainController extends Controller
             ->groupBy('game_id')
             ->pluck('latest_published_at', 'game_id');
 
-        return $games->map(function (Game $game) use ($results, $businessDates, $latestPublishedAt) {
+        return $games->map(function (Game $game) use ($results, $businessDates, $latestPublishedAt, $latestPublishedResults) {
             $gameResults = $results->get($game->id, collect());
             $dates = $businessDates[$game->id];
             $todayResult = optional($gameResults->firstWhere('game_date', $dates['today']))->number;
             $yesterdayResult = optional($gameResults->firstWhere('game_date', $dates['yesterday']))->number;
+            $latestResult = $latestPublishedResults->get($game->id);
 
             return [
                 'id' => $game->id,
@@ -234,6 +384,8 @@ class MainController extends Controller
                 'slug' => $game->slug,
                 'serial' => (int) $game->serial,
                 'latest_result_at' => $latestPublishedAt->get($game->id),
+                'latest_result' => $latestResult && filled($latestResult->number) ? (string) $latestResult->number : '--',
+                'latest_result_date' => $latestResult?->game_date,
                 'time' => $game->result_time ? Carbon::parse($game->result_time)->format('h:i A') : '—',
                 'today' => $todayResult !== null && $todayResult !== '' ? (string) $todayResult : '--',
                 'yesterday' => $yesterdayResult !== null && $yesterdayResult !== '' ? (string) $yesterdayResult : '--',
