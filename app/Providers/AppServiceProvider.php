@@ -80,6 +80,7 @@ class AppServiceProvider extends ServiceProvider
                     'siteLogo' => $logoName !== '' ? asset('logos/' . basename($logoName)) : asset('frontend/images/logo.png'),
                     'siteDescription' => trim((string) $settings->value('footer_description', $settings->value('site_description', 'Published results and historical monthly records.'))),
                     'contactPhone' => trim((string) $settings->value('contact_phone', '')),
+                    'contactEmail' => trim((string) $settings->value('email', '')),
                     'copyrightText' => trim((string) $settings->value('copyright_text', '')),
                     'socialFacebook' => trim((string) $settings->value('social_facebook', '')),
                     'socialWhatsApp' => trim((string) $settings->value('social_whatsapp', '')),
