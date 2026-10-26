@@ -43,7 +43,6 @@
     </section>
 
 <section class="live-hero">
-        <h1 class="sr-only">{{ $homeTitle }}</h1>
         @if (!empty($featuredGame))
             <div class="live-box" data-live-box>
                 <div class="gname">{{ $featuredGame['name'] }}</div>
@@ -63,6 +62,8 @@
                     <div class="gname">{{ $featuredGame['name'] }}</div>
                     <div class="sub">Today's result</div>
                     <div class="gname">{{ ($featuredGame['today'] ?? '--') !== '--' ? $featuredGame['today'] : '—' }}</div>
+                    <div class="sub mt-2">Previous result</div>
+                    <div class="gname">{{ ($featuredGame['yesterday'] ?? '--') !== '--' ? $featuredGame['yesterday'] : '—' }}</div>
                 </div>
             </div>
         @else
