@@ -40,15 +40,7 @@
                             <th>Actions</th>
                         </tr>
                     </thead>
-                    <tfoot>
-                        <tr>
-                            <th>Serial</th>
-                            <th>Question</th>
-                            <th>Answer</th>
-                            <th>Created At</th>
-                            <th>Actions</th>
-                        </tr>
-                    </tfoot>
+                    <tfoot><tr><th>Serial</th><th>Question</th><th>Answer</th><th>Platform</th><th>Visibility</th><th>Order</th><th>Created At</th><th>Actions</th></tr></tfoot>
                     <tbody>
                         @foreach ($faqs as $faq)
                             <tr>
