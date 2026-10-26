@@ -21,6 +21,7 @@ class SupportFaqController extends Controller
         $faqs = Cache::remember("support-faqs:{$siteKey}:{$platform}", now()->addMinutes(5), function () use ($platform) {
             return Faq::query()
                 ->where('is_active', true)
+                ->whereNull('page_slug')->whereNull('game_id')
                 ->whereIn('platform', [$platform, 'both'])
                 ->orderBy('sort_order')->orderBy('id')
                 ->get(['id', 'question', 'answer', 'platform'])
