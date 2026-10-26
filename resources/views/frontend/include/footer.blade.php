@@ -16,6 +16,9 @@
             @if ($contactPhone !== '')
                 <p class="muted small">Contact: <a href="tel:{{ preg_replace('/[^0-9+]/', '', $contactPhone) }}">{{ $contactPhone }}</a></p>
             @endif
+            @if ($contactEmail !== '')
+                <p class="muted small">Email: <a href="mailto:{{ $contactEmail }}">{{ $contactEmail }}</a></p>
+            @endif
             <div class="d-flex flex-wrap gap-2">
                 @foreach (['Facebook' => $socialFacebook, 'WhatsApp' => $socialWhatsApp, 'Instagram' => $socialInstagram, 'YouTube' => $socialYouTube, 'Telegram' => $socialTelegram] as $socialName => $socialUrl)
                     @if ($socialUrl !== '')
