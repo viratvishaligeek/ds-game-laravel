@@ -51,7 +51,7 @@ class MainController extends Controller
             'yesterday',
         ])->all())->all();
         $homepageSections = HomePage::query()->where('status', 'active')->orderBy('id')->get(['id', 'title', 'content']);
-        $faqs = Faq::query()->where('is_active', true)->whereIn('platform', ['web', 'both'])->orderBy('sort_order')->orderBy('id')->get(['id', 'question', 'answer']);
+        $faqs = Faq::query()->where('is_active', true)->whereIn('platform', ['web', 'both'])->whereNull('page_slug')->whereNull('game_id')->orderBy('sort_order')->orderBy('id')->get(['id', 'question', 'answer']);
         $publishedResultsQuery = Result::query()
             ->where('type', 'jodi')
             ->whereNotNull('game_date')
@@ -249,9 +249,14 @@ class MainController extends Controller
         rsort($availableYears);
         $canonical = rtrim((string) app(AppSettingsService::class)->value('canonical_url', config('app.url', url('/'))), '/')
             . '/result/' . $game->slug;
+        $faqs = Faq::query()->where('is_active', true)->whereIn('platform', ['web', 'both'])
+            ->where(function ($query) use ($game) {
+                $query->where(fn ($scope) => $scope->whereNull('page_slug')->whereNull('game_id'))
+                    ->orWhere('game_id', $game->id);
+            })->orderBy('sort_order')->orderBy('id')->get(['id', 'question', 'answer']);
 
         return response()
-            ->view('frontend.market', compact('game', 'year', 'month', 'monthLabel', 'results', 'canonical', 'currentYear', 'currentMonth', 'availableYears'))
+            ->view('frontend.market', compact('game', 'year', 'month', 'monthLabel', 'results', 'canonical', 'currentYear', 'currentMonth', 'availableYears', 'faqs'))
             ->header('X-Robots-Tag', $request->query->count() > 0 ? 'noindex, follow' : 'index, follow');
     }
 
@@ -297,7 +302,13 @@ class MainController extends Controller
     {
         $page = Page::query()->where('slug', $slug)->where('status', 'active')->firstOrFail();
 
-        return view('frontend.page', compact('page'));
+        $faqs = Faq::query()->where('is_active', true)->whereIn('platform', ['web', 'both'])
+            ->where(function ($query) use ($page) {
+                $query->where(fn ($scope) => $scope->whereNull('page_slug')->whereNull('game_id'))
+                    ->orWhere('page_slug', $page->slug);
+            })->orderBy('sort_order')->orderBy('id')->get(['id', 'question', 'answer']);
+
+        return view('frontend.page', compact('page', 'faqs'));
     }
 
     public function information(string $page)
@@ -323,7 +334,7 @@ class MainController extends Controller
         ];
         abort_unless(isset($pages[$page]), 404);
         [$title, $copy] = $pages[$page];
-        $faqs = $page === 'faq' ? Faq::query()->where('is_active', true)->whereIn('platform', ['web', 'both'])->orderBy('sort_order')->orderBy('id')->get() : collect();
+        $faqs = $page === 'faq' ? Faq::query()->where('is_active', true)->whereIn('platform', ['web', 'both'])->where(function ($query) { $query->where(fn ($scope) => $scope->whereNull('page_slug')->whereNull('game_id'))->orWhere('page_slug', 'faq'); })->orderBy('sort_order')->orderBy('id')->get() : collect();
 
         return view('frontend.information', compact('page', 'title', 'copy', 'faqs'));
     }
