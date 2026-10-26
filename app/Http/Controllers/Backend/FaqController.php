@@ -15,7 +15,7 @@ class FaqController extends Controller
 {
     public function index(): View
     {
-        $faqs = Faq::query()->orderBy('sort_order')->orderBy('id')->get();
+        $faqs = Faq::query()->with('game')->orderBy('sort_order')->orderBy('id')->get();
         $pageName = 'FAQs Management';
         return view('backend.faqs.index', compact('faqs', 'pageName'));
     }
@@ -59,6 +59,8 @@ class FaqController extends Controller
             'platform' => ['required', 'in:web,app,both'],
             'is_active' => ['required', 'boolean'],
             'sort_order' => ['required', 'integer', 'min:0', 'max:100000'],
+            'page_slug' => ['nullable', 'string', 'max:150', 'regex:/^[A-Za-z0-9-]+$/'],
+            'game_id' => ['nullable', 'integer', Rule::exists('games', 'id')->where(fn ($query) => $query->where('status', 'active')->whereNull('deleted_at'))],
         ]);
         $faq->update($validated);
         $this->clearFaqCache();
