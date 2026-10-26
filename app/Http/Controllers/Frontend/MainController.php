@@ -8,12 +8,10 @@ use App\Models\Game;
 use App\Models\HomePage;
 use App\Models\Page;
 use App\Models\Result;
-use App\Models\Winner;
 use App\Services\AppSettingsService;
 use App\Services\MonthlyChartService;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\DB;
 
 class MainController extends Controller
 {
@@ -29,8 +27,6 @@ class MainController extends Controller
             ->orderBy('id')
             ->get(['id', 'name', 'slug', 'serial', 'result_time', 'last_result']);
 
-        // Keep public lists in stable serial order, but feature the game whose
-        // latest non-empty result record was published/updated most recently.
         $frontendResults = $this->getFrontendResults();
         $featuredGame = collect($frontendResults)->sort(function (array $a, array $b) {
             $timestampOrder = strcmp((string) ($b['latest_result_at'] ?? ''), (string) ($a['latest_result_at'] ?? ''));
