@@ -321,7 +321,13 @@ class MainController extends Controller
         $databaseSlug = $pageAliases[$page] ?? $page;
         $databasePage = Page::query()->where('slug', $databaseSlug)->where('status', 'active')->first();
         if ($databasePage && $page !== 'faq') {
-            return view('frontend.page', ['page' => $databasePage]);
+            $pageFaqs = Faq::query()->where('is_active', true)->whereIn('platform', ['web', 'both'])
+                ->where(function ($query) use ($page, $databaseSlug) {
+                    $query->where(fn ($scope) => $scope->whereNull('page_slug')->whereNull('game_id'))
+                        ->orWhereIn('page_slug', array_values(array_unique([$page, $databaseSlug])));
+                })->orderBy('sort_order')->orderBy('id')->get(['id', 'question', 'answer']);
+
+            return view('frontend.page', ['page' => $databasePage, 'faqs' => $pageFaqs]);
         }
 
         $pages = [
