@@ -5,7 +5,7 @@
 
 @section('content')
 <section class="section">
-    <div class="wrap">
+    <div class="">
         <div class="d-flex flex-wrap justify-content-between align-items-center gap-3 mb-4">
             <div><h1 class="h2 mb-1">Community Discussions</h1><p class="text-body-secondary mb-0">Approved posts only. Community content is user-submitted and does not predict future results.</p></div>
             <div class="d-flex flex-wrap gap-2">

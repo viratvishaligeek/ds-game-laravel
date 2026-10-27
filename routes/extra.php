@@ -26,6 +26,36 @@ Route::get('/firebase-config.js', function () {
     ]);
 });
 
+
+Route::get('/optimize-clear', function () {
+    Artisan::call('optimize:clear');
+
+    return response()->json([
+        'success' => true,
+        'message' => 'Application cache cleared successfully.',
+    ]);
+});
+
+// Route::get('/storage-link', function () {
+//     Artisan::call('storage:link');
+
+//     return response()->json([
+//         'success' => true,
+//         'message' => 'Storage link created successfully.',
+//     ]);
+// });
+
+// Route::get('/fresh-db', function () {
+//     Artisan::call('migrate:fresh');
+//     Artisan::call('db:seed');
+//     Artisan::call('permissions:setup');
+//     return response()->json([
+//         'success' => true,
+//         'message' => 'New Migration, New Seed, New Permissions setuped successfully.',
+//     ]);
+// });
+
+
 Route::get('/firebase-config.json', function () {
     $web = config('services.fcm_web');
 

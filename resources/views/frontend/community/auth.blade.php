@@ -4,7 +4,7 @@
 @section('meta_robots', 'noindex,follow')
 
 @section('content')
-<section class="section"><div class="wrap" style="max-width:520px">
+<section class="section"><div class="" style="max-width:520px">
     <div class="card shadow-sm"><div class="card-body p-4">
         <h1 class="h3">{{ $mode === 'register' ? 'Create your account' : 'Sign in to the community' }}</h1>
         <p class="text-body-secondary">Participate in moderated community discussions.</p>

@@ -5,7 +5,7 @@
 @section('og_type', 'article')
 
 @section('content')
-<section class="section"><div class="wrap" style="max-width:900px">
+<section class="section"><div class="" style="max-width:900px">
     <p><a href="{{ route('community.index') }}">← Back to community</a></p>
     <article class="card shadow-sm mb-4"><div class="card-body p-4">
         <span class="badge text-bg-primary">{{ $post->game?->name ?? 'Game unavailable' }}</span>

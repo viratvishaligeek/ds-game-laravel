@@ -6,7 +6,7 @@
 
 @section('content')
 <section class="section">
-    <div class="wrap">
+    <div class="">
         <div class="center mb-4">
             <h1>Monthly Results Charts</h1>
             <p class="muted">Select a game, month, and year to view stored result records.</p>

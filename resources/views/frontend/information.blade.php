@@ -5,7 +5,7 @@
 @section('meta_robots', $page === 'faq' ? 'index,follow' : 'index,follow')
 
 @section('content')
-<section class="section"><div class="wrap" style="max-width:900px">
+<section class="section"><div class="" style="max-width:900px">
     <article class="blog-card">
         <h1>{{ $title }}</h1>
         <p class="muted">{{ $copy }}</p>

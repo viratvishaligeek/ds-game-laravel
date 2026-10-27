@@ -6,7 +6,7 @@
 
 @section('content')
 <section class="section">
-    <div class="wrap">
+    <div class="">
         <div class="center mb-4">
             <h1>{{ $game->name }} Result & Monthly Chart</h1>
             <p class="muted">Historical records shown here come from the site's published results.</p>

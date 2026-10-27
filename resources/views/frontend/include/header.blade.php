@@ -26,7 +26,7 @@
     </div>
     <div class="wrap header-row">
         <a href="{{ route('index') }}" class="logo" aria-label="{{ $siteName }} Home">
-            <img src="{{ $siteLogo }}" alt="{{ $siteName }}" class="logo-img">
+            <img src="{{ $siteLogo }}" alt="{{ $siteName }}" class="logo-img">  {{$siteName}}
         </a>
         <nav class="nav-desktop" aria-label="Main navigation">
             <a href="{{ route('index') }}" class="{{ request()->routeIs('index') ? 'active' : '' }}">Home</a>

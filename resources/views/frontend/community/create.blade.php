@@ -4,7 +4,7 @@
 @section('meta_robots', 'noindex,follow')
 
 @section('content')
-<section class="section"><div class="wrap" style="max-width:760px">
+<section class="section"><div class="" style="max-width:760px">
     <p><a href="{{ route('community.index') }}">← Back to community</a></p>
     <div class="card shadow-sm"><div class="card-body p-4">
         <h1 class="h3">Create a community post</h1>
