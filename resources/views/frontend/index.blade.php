@@ -49,8 +49,6 @@
                                 <i class="bi bi-download" aria-hidden="true"></i><span>Download App</span>
                             </a>
                         @endif
-                        <span class="small text-secondary"><i class="bi bi-clock-history me-1"
-                                aria-hidden="true"></i>Explore results and market history</span>
                     </div>
                 </div>
                 <div class="col-lg-5">

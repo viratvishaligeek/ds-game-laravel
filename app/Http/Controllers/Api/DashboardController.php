@@ -27,6 +27,9 @@ class DashboardController extends Controller
                 'id',
                 'name',
                 'image',
+                'destinationUrl',
+                'app_screen'
+
             ])
             ->map(function ($banner) {
                 return [
@@ -34,6 +37,8 @@ class DashboardController extends Controller
                     'name' => $banner->name,
                     'image' => $banner->image,
                     'image_url' => $banner->image_url ?? $banner->image,
+                    'destinationUrl' => $banner->destinationUrl,
+                    'app_screen' => $banner->app_screen
                 ];
             })
             ->values();

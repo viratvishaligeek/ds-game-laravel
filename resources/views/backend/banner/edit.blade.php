@@ -56,6 +56,21 @@
                                 <div class="invalid-feedback">{{ $message }}</div>
                             @enderror
                         </div>
+                         <div class="col-md-8 mb-3">
+                            <label class="small mb-1" for="destinationUrl">Banner URL <span class="text-danger">*</span></label>
+                            <input class="form-control" id="destinationUrl" name="destinationUrl" type="text"
+                                placeholder="e.g. Destination Url" value="{{ old('destinationUrl', $banner->destinationUrl) }}" />
+                        </div>
+
+                        <div class="col-md-4 mb-3">
+                            <label class="small mb-1" for="app_screen">App Screen <span class="text-danger">*</span></label>
+                            <select class="form-select" id="app_screen" name="app_screen">
+                                <option value="top" {{ old('app_screen', $banner->app_screen) === 'top' ? 'selected' : '' }}>Top
+                                </option>
+                                <option value="bottom" {{ old('app_screen', $banner->app_screen) === 'bottom' ? 'selected' : '' }}>Bottom
+                                </option>
+                            </select>
+                        </div>
                     </div>
 
                     <div class="mb-3">
