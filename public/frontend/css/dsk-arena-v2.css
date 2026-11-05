@@ -155,3 +155,20 @@ a{color:#9db9ff;text-underline-offset:3px}
   .blog-card .stat-row{grid-template-columns:1fr}
   .chart-table{min-width:480px}
 }
+
+/* Bootstrap utilities and native controls use the Disawar arena palette. */
+:root{
+  color-scheme:dark;
+  --bs-body-color:#f4f6ff;
+  --bs-body-bg:#090f20;
+  --bs-secondary-color:#a7b2ca;
+  --bs-tertiary-color:#8292b2;
+  --bs-border-color:#2c3b5c;
+  --bs-link-color:#9db9ff;
+  --bs-link-hover-color:#d0dfff;
+  --bs-primary:#765cf5;
+  --bs-primary-rgb:118,92,245;
+}
+.section .text-dark,.home-intro .text-dark{color:#f4f6ff!important}
+.section.alt.bg-light{background:linear-gradient(145deg,#111c34,#162442)!important;color:#f4f6ff!important}
+.chart-table td.text-dark{color:#e9efff!important}
