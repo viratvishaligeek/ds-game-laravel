@@ -275,65 +275,65 @@
 
 @section('script')
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-
     <script>
         $(function () {
-            if (window.feather) feather.replace();
+            if (window.feather) window.feather.replace();
 
-            $('.view-proof-btn').on('click', function () {
+            // Delegated bindings survive DataTable redraws and pagination updates.
+            $(document).on('click.adminAddRequests', '.view-proof-btn', function () {
+                const imageUrl = $(this).data('image');
                 const $image = $('#proofImage');
-                $image.off('error').on('error', function () {
-                    $(this).attr('src', 'data:image/svg+xml;charset=UTF-8,' + encodeURIComponent('<svg xmlns="http://www.w3.org/2000/svg" width="640" height="360"><rect width="100%" height="100%" fill="#f1f5f9"/><text x="50%" y="50%" text-anchor="middle" dominant-baseline="middle" fill="#64748b" font-family="Arial" font-size="22">Image unavailable</text></svg>'));
-                }).attr('src', $(this).data('image'));
+                $image.off('error.adminProof').on('error.adminProof', function () {
+                    $(this).attr('alt', 'Payment proof image is unavailable').removeAttr('src');
+                });
+                $image.attr('src', imageUrl || '');
             });
 
-            $('.approve-btn').on('click', function () {
-                const form = $(this).closest('form').get(0);
-                const name = $(this).data('name');
-                const amount = $(this).data('amount');
-                Swal.fire({
+            $(document).on('click.adminAddRequests', '.approve-btn', function (event) {
+                event.preventDefault();
+                const $button = $(this);
+                const form = $button.closest('form').get(0);
+                if (!form || $button.prop('disabled')) return;
+
+                const submitApproval = () => {
+                    $button.prop('disabled', true);
+                    form.submit();
+                };
+
+                if (!window.Swal || typeof window.Swal.fire !== 'function') {
+                    if (window.confirm('Approve this wallet top-up?')) submitApproval();
+                    return;
+                }
+
+                window.Swal.fire({
                     title: 'Approve Wallet Top-up?',
-                    html: '<div class="text-center"><p class="mb-1">User: <strong>' + $('<div>').text(name).html() + '</strong></p><p>Amount: <strong class="text-success">₹' + $('<div>').text(amount).html() + '</strong></p><small class="text-muted">This amount will be credited to the user\'s wallet.</small></div>',
+                    text: 'Approve ₹' + String($button.data('amount') || '') + ' for ' + String($button.data('name') || 'this user') + '?',
                     icon: 'question',
                     showCancelButton: true,
+                    confirmButtonText: 'Yes, approve',
+                    cancelButtonText: 'Cancel',
                     confirmButtonColor: '#1cc88a',
-                    cancelButtonColor: '#858796',
-                    confirmButtonText: 'Yes, Approve',
-                    cancelButtonText: 'Cancel'
-                }).then(result => { if (result.isConfirmed) form.submit(); });
+                    reverseButtons: true
+                }).then(result => {
+                    if (result.isConfirmed) submitApproval();
+                });
             });
 
-            $('.reject-btn').on('click', function () {
-                $('#rejectUserName').text($(this).data('name'));
-                $('#rejectForm').attr('action', $(this).data('action'));
+            $(document).on('click.adminAddRequests', '.reject-btn', function () {
+                const $button = $(this);
+                $('#rejectUserName').text($button.data('name') || 'User');
+                $('#rejectForm').attr('action', $button.data('action') || '');
+                $('#rejectForm [name="admin_remark"]').val('');
+            });
+
+            $('#rejectForm').on('submit.adminAddRequests', function (event) {
+                const action = $(this).attr('action');
+                const remark = String($(this).find('[name="admin_remark"]').val() || '').trim();
+                if (!action || !remark) {
+                    event.preventDefault();
+                    window.Swal?.fire({ icon: 'warning', title: 'Rejection reason required', text: 'Enter a reason before rejecting this request.' });
+                }
             });
         });
-        $image.attr('src', $(this).data('image'));
-    });
-
-    $(document).on('click.adminWalletRequests', '.approve-btn', function () {
-        const $button = $(this);
-        const form = $button.closest('form')[0];
-        const name = escapeHtml($button.data('name'));
-        const amount = escapeHtml($button.data('amount'));
-        if (!form || typeof Swal === 'undefined') return;
-        Swal.fire({
-            title: 'Approve Wallet Top-up?',
-            html: '<div class="text-center"><p class="mb-1">User: <strong>' + name + '</strong></p><p>Amount: <strong class="text-success">₹' + amount + '</strong></p><small class="text-muted">This amount will be credited to the user's wallet.</small></div>',
-            icon: 'question',
-            showCancelButton: true,
-            confirmButtonColor: '#1cc88a',
-            cancelButtonColor: '#858796',
-            confirmButtonText: 'Yes, Approve',
-            cancelButtonText: 'Cancel'
-        }).then(result => { if (result.isConfirmed) form.submit(); });
-    });
-
-    $(document).on('click.adminWalletRequests', '.reject-btn', function () {
-        const $button = $(this);
-        $('#rejectUserName').text($button.data('name') || '');
-        $('#rejectForm').attr('action', $button.data('action') || '');
-    });
-});
-</script>
+    </script>
 @endsection
