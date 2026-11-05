@@ -256,6 +256,7 @@
             const notify = (icon, title, text) => {
                 if (window.Swal?.fire) return window.Swal.fire({ icon, title, text });
                 window.alert(text || title);
+                return Promise.resolve();
             };
             const showCreditError = message => {
                 $error.text(message || 'Unable to credit wallet.').removeClass('d-none');
@@ -320,7 +321,8 @@
                     }
                     $success.text(result.message || 'Wallet credited successfully.').removeClass('d-none');
                     modal?.hide();
-                    notify('success', 'Credit successful', result.message || 'Wallet credited successfully.');
+                    await notify('success', 'Credit successful', result.message || 'Wallet credited successfully.');
+                    window.location.reload();
                 } catch (error) {
                     const response = error.responseJSON || {};
                     const firstError = response.errors ? Object.values(response.errors).flat()[0] : null;
@@ -379,7 +381,8 @@
                     $button.find('i').attr('data-feather', status === 'active' ? 'slash' : 'check-circle')
                         .attr('class', status === 'active' ? 'text-warning' : 'text-info');
                     if (window.feather) window.feather.replace();
-                    notify('success', 'Status updated', response.message || 'User status updated successfully.');
+                    await notify('success', 'Status updated', response.message || 'User status updated successfully.');
+                    window.location.reload();
                 } catch (error) {
                     const response = error.responseJSON || {};
                     notify('error', 'Unable to update status', response.message || error.message || 'Please retry.');
