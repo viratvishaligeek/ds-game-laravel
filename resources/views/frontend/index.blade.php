@@ -225,7 +225,7 @@
         'sections' => $homepageSections->get('second_place_another', collect()),
     ])
 
-    <section class="section alt bg-light">
+    <section class="section alt">
         <div class=" p-0">
             <div class="center">
                 <h2 class="text-dark">{{ $monthLabel }} — Monthly Results Chart</h2>
