@@ -9,6 +9,7 @@ use App\Models\User;
 use App\Models\WalletRequest;
 use App\Services\ReferralService;
 use App\Services\WalletService;
+use App\Services\PushNotificationService;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -116,6 +117,50 @@ class AdminTableActionsTest extends TestCase
             'id' => $walletRequest->id,
             'request_type' => 'debit',
             'status' => 'approved',
+            'processed_by_admin_id' => $admin->id,
+        ]);
+    }
+
+    public function test_wallet_rejection_returns_json_and_records_the_admin_processor(): void
+    {
+        $admin = Admin::query()->create([
+            'name' => 'Wallet Reviewer',
+            'email' => 'wallet-reviewer@example.test',
+            'password' => 'test-password',
+            'status' => 'active',
+        ]);
+        Auth::guard('admin')->setUser($admin);
+
+        $user = User::factory()->create(['status' => 'active']);
+        $walletRequest = WalletRequest::query()->create([
+            'user_id' => $user->id,
+            'request_type' => 'credit',
+            'payment_method' => 'manual_upi',
+            'amount' => 100,
+            'status' => 'pending',
+        ]);
+
+        $push = Mockery::mock(PushNotificationService::class);
+        $push->shouldReceive('sendToUser')->once()->andReturn(0);
+        $this->app->instance(PushNotificationService::class, $push);
+
+        $request = Request::create('/admin/wallet/requests/' . $walletRequest->id . '/reject', 'POST', [
+            'admin_remark' => 'Payment proof could not be verified.',
+        ]);
+        $request->headers->set('Accept', 'application/json');
+
+        $response = (new WalletRequestController(
+            Mockery::mock(WalletService::class),
+            Mockery::mock(ReferralService::class)
+        ))->reject($request, $walletRequest);
+
+        $this->assertSame(200, $response->getStatusCode());
+        $this->assertTrue($response->getData(true)['success']);
+        $this->assertDatabaseHas('wallet_requests', [
+            'id' => $walletRequest->id,
+            'status' => 'rejected',
+            'admin_remark' => 'Payment proof could not be verified.',
+            'processed_by' => null,
             'processed_by_admin_id' => $admin->id,
         ]);
     }
