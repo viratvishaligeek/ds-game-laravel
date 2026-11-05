@@ -72,6 +72,7 @@ class WalletRequestController extends Controller
         $walletRequest->load([
             'user:id,name,phone,balance',
             'processor:id,name',
+            'adminProcessor:id,name',
         ]);
 
         return view('backend.wallet.request-show', [
@@ -142,7 +143,7 @@ class WalletRequestController extends Controller
 
                 $walletRequest->update([
                     'status' => 'approved',
-                    'processed_by' => $request->user()->id,
+                    'processed_by_admin_id' => auth('admin')->id(),
                     'admin_remark' => $validated['admin_remark'] ?? null,
                     'processed_at' => now(),
                 ]);
@@ -210,7 +211,7 @@ class WalletRequestController extends Controller
 
                 $walletRequest->update([
                     'status' => 'rejected',
-                    'processed_by' => $request->user()->id,
+                    'processed_by_admin_id' => auth('admin')->id(),
                     'admin_remark' => $validated['admin_remark'],
                     'processed_at' => now(),
                 ]);
