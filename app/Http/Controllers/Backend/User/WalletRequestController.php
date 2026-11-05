@@ -149,10 +149,15 @@ class WalletRequestController extends Controller
             });
 
             $walletRequest->refresh();
-            return back()->with(
-                'success',
-                'Wallet request approved successfully.'
-            );
+            $message = 'Wallet request approved successfully.';
+            if ($request->expectsJson()) {
+                return response()->json([
+                    'success' => true,
+                    'message' => $message,
+                    'data' => ['request_id' => $walletRequest->id, 'status' => $walletRequest->status],
+                ]);
+            }
+            return back()->with('success', $message);
         } catch (ValidationException $e) {
             return back()
                 ->withErrors($e->errors())
@@ -202,10 +207,15 @@ class WalletRequestController extends Controller
             $walletRequest->refresh();
             $this->notifyWalletRequest($walletRequest, 'rejected');
 
-            return back()->with(
-                'success',
-                'Wallet request rejected successfully.'
-            );
+            $message = 'Wallet request rejected successfully.';
+            if ($request->expectsJson()) {
+                return response()->json([
+                    'success' => true,
+                    'message' => $message,
+                    'data' => ['request_id' => $walletRequest->id, 'status' => $walletRequest->status],
+                ]);
+            }
+            return back()->with('success', $message);
         } catch (ValidationException $e) {
             return back()
                 ->withErrors($e->errors())
