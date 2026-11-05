@@ -274,7 +274,7 @@ class UserController extends Controller
             }
 
             return redirect()->back()->with('success', $message);
-        } catch (\\Throwable $e) {
+        } catch (\Throwable $e) {
             report($e);
 
             if ($request->expectsJson()) {
