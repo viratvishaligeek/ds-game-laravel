@@ -5,6 +5,7 @@ on:
     branches:
       - main
       - feature/dynamic-frontend-seo-bootstrap-audit
+      - implementation/**
   pull_request:
     branches:
       - main
