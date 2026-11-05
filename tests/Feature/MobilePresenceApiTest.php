@@ -44,4 +44,56 @@ class MobilePresenceApiTest extends TestCase
 
         $this->assertNotNull($session->fresh()->ended_at);
     }
+    public function test_stale_foreground_lease_is_expired_by_the_scheduler_in_application_timezone(): void
+    {
+        $user = User::factory()->create(['status' => 'active']);
+        $user->forceFill(['live_status' => 'active'])->save();
+
+        $session = UserPresenceSession::query()->create([
+            'user_id' => $user->id,
+            'session_id' => 'stale-foreground-session',
+            'platform' => 'android',
+            'app_state' => 'foreground',
+            'last_seen_at' => now()->subMinutes(10),
+        ]);
+        UserPresenceSession::query()->whereKey($session->id)
+            ->update(['updated_at' => now()->subMinutes(2)]);
+
+        $this->artisan('presence:expire')->assertExitCode(0);
+
+        $this->assertSame('inactive', $user->fresh()->live_status);
+    }
+
+    public function test_repeated_background_heartbeat_does_not_extend_grace_period(): void
+    {
+        $user = User::factory()->create(['status' => 'active']);
+        $payload = [
+            'session_id' => 'background-grace-session',
+            'platform' => 'android',
+            'app_state' => 'foreground',
+            'activity' => true,
+            'activity_at' => now()->toIso8601String(),
+        ];
+
+        $this->actingAs($user, 'sanctum')
+            ->postJson('/api/v1/presence/heartbeat', $payload)
+            ->assertOk()
+            ->assertJsonPath('live_status', 'active');
+
+        $payload['app_state'] = 'background';
+        $payload['activity'] = false;
+        $payload['activity_at'] = null;
+        $this->actingAs($user, 'sanctum')
+            ->postJson('/api/v1/presence/heartbeat', $payload)
+            ->assertOk();
+
+        $this->travel(2)->minutes();
+        $this->actingAs($user, 'sanctum')
+            ->postJson('/api/v1/presence/heartbeat', $payload)
+            ->assertOk()
+            ->assertJsonPath('live_status', 'inactive');
+
+        $this->assertSame('inactive', $user->fresh()->live_status);
+    }
+
 }
