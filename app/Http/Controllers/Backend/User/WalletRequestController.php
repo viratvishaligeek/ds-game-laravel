@@ -159,16 +159,28 @@ class WalletRequestController extends Controller
             }
             return back()->with('success', $message);
         } catch (ValidationException $e) {
+            if ($request->expectsJson()) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Please correct the request and try again.',
+                    'errors' => $e->errors(),
+                ], 422);
+            }
+
             return back()
                 ->withErrors($e->errors())
                 ->withInput();
         } catch (\Throwable $e) {
             report($e);
 
-            return back()->with(
-                'error',
-                'Unable to approve wallet request.'
-            );
+            if ($request->expectsJson()) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Unable to approve wallet request. No wallet change was confirmed.',
+                ], 500);
+            }
+
+            return back()->with('error', 'Unable to approve wallet request.');
         }
     }
 
@@ -217,16 +229,28 @@ class WalletRequestController extends Controller
             }
             return back()->with('success', $message);
         } catch (ValidationException $e) {
+            if ($request->expectsJson()) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Please correct the request and try again.',
+                    'errors' => $e->errors(),
+                ], 422);
+            }
+
             return back()
                 ->withErrors($e->errors())
                 ->withInput();
         } catch (\Throwable $e) {
             report($e);
 
-            return back()->with(
-                'error',
-                'Unable to reject wallet request.'
-            );
+            if ($request->expectsJson()) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Unable to reject wallet request. No wallet change was confirmed.',
+                ], 500);
+            }
+
+            return back()->with('error', 'Unable to reject wallet request.');
         }
     }
 
