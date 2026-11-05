@@ -1,0 +1,86 @@
+/* Disawar Bazaar — arena v2 theme. Visual-only overrides; dynamic Blade content/routes remain untouched. */
+:root{
+ --dsk-ink:#f4f6ff;--dsk-muted:#a7b2ca;--dsk-bg:#090f20;--dsk-panel:#131d35;
+ --dsk-panel-2:#192642;--dsk-line:#2c3b5c;--dsk-green:#20c997;--dsk-gold:#ffc857;
+ --dsk-blue:#4b83ff;--dsk-violet:#8b70ff;--dsk-radius:20px;
+}
+html{scroll-behavior:smooth;scroll-padding-top:90px}
+body{background:radial-gradient(ellipse at 10% 0,#1d2a4a 0,transparent 34%),var(--dsk-bg);color:var(--dsk-ink);font-family:Inter,system-ui,sans-serif}
+a{color:#9db9ff;text-underline-offset:3px}
+.site-header{position:relative;z-index:20;background:#101a30;border-bottom:1px solid var(--dsk-line);box-shadow:0 12px 32px #0004}
+.ticker{background:#080e1d;color:#b9c6e2;border-bottom:1px solid #273553}
+.ticker-date{color:#fbd47e}
+.header-row{min-height:76px}
+.logo{color:#fff;font-weight:900;letter-spacing:-.03em}
+.logo-img{max-height:44px;object-fit:contain}
+.nav-desktop a,.nav-mobile a{color:#c1cce2;border-radius:11px;font-weight:700}
+.nav-desktop a:hover,.nav-mobile a:hover,.nav-desktop a.active,.nav-mobile a.active{background:#273657;color:#fff}
+.nav-mobile{background:#111c33;border-top:1px solid #2c3b5c}
+.home-intro{background:transparent!important;color:var(--dsk-ink)!important;padding-block:clamp(34px,5vw,64px)!important}
+.home-intro .display-4{font-family:Oswald,sans-serif;color:#fff;font-size:clamp(2.4rem,5.2vw,4.5rem);letter-spacing:-.025em}
+.home-intro .lead{max-width:680px;color:#b5c1d8;line-height:1.75}
+.home-intro .text-uppercase{color:#71e6c4!important;letter-spacing:.12em}
+.home-intro-panel{border:1px solid var(--dsk-line)!important;background:linear-gradient(150deg,#1a2948,#111b31)!important;color:#f4f6ff;box-shadow:0 22px 50px #0004!important}
+.home-intro-panel .text-secondary{color:#9eacc7!important}
+.home-intro-icon{width:44px;height:44px;background:#26395e;color:#7fe5c6}
+.live-hero{margin:12px auto 28px;width:min(1180px,calc(100% - 28px));padding:clamp(18px,3vw,28px);border:1px solid #344567;border-radius:26px;background:radial-gradient(circle at 90% 10%,#3d4b94 0,transparent 34%),linear-gradient(135deg,#17264a,#1b3150);box-shadow:0 24px 60px #0004;color:#fff}
+.live-box{border:1px solid #536b91;border-radius:20px;background:#101c34;color:#fff;box-shadow:0 14px 35px #0003}
+.live-box .gname{color:#a8e9d5}
+.live-box .gnum{font-family:Oswald,sans-serif;color:#ffd36f;font-size:clamp(44px,7vw,72px);font-weight:900}
+.live-box .sub,.live-hero .muted{color:#aebbd3}
+.badge-live{background:#1c9b79;color:#fff;border-radius:99px;padding:6px 11px;font-size:10px;font-weight:900;letter-spacing:.1em}
+.share-box{border:1px solid #405478;border-radius:16px;background:#111d35;color:#e8edfb}
+.share-row a{border-radius:10px;font-weight:800}
+.hero{position:relative;overflow:hidden;border:1px solid #344567;border-radius:26px;background:radial-gradient(circle at 78% 12%,#554aab 0,transparent 34%),linear-gradient(125deg,#15264a,#263c70);color:#fff;box-shadow:0 22px 55px #0004}
+.hero-inner{color:#fff}
+.hero-date,.hero-pill{color:#c6d3ed}
+.hero-pill{border:1px solid #566b91;border-radius:99px;background:#ffffff12}
+.hero-card{border:1px solid #4c5f83;border-radius:18px;background:linear-gradient(145deg,#1d3156,#111d35);box-shadow:0 12px 30px #0003}
+.hero-card .num{font-family:Oswald,sans-serif;color:#ffd36f}
+.hero-card .name{color:#fff}
+.lrb-section{color:#f4f6ff}
+.lrb-heading,.section h2,.section h3{font-family:Oswald,sans-serif;color:#fff;letter-spacing:.01em}
+.lrb-card{border:1px solid var(--dsk-line);border-radius:18px;background:linear-gradient(150deg,#1a2947,#111b30);color:#f4f6ff;box-shadow:0 12px 28px #0003}
+.lrb-card .lrb-name{color:#fff}
+.lrb-card .lrb-badge{border-radius:99px;background:#254c59;color:#8df0d1}
+.section{color:#f4f6ff}
+.section .card,.card{border-color:var(--dsk-line);border-radius:18px;background:var(--dsk-panel);color:#f4f6ff;box-shadow:0 12px 30px #0003}
+.card-body{color:#e9edfa}
+.form-label{color:#d5def0;font-weight:700}
+.form-select,.form-control{border-color:#3a4b6e;background:#0e1830;color:#f4f6ff}
+.form-select:focus,.form-control:focus{border-color:#8b70ff;background:#101c36;color:#fff;box-shadow:0 0 0 .2rem #8b70ff2b}
+.form-select option{background:#101a30;color:#fff}
+.btn-primary{--bs-btn-bg:#765cf5;--bs-btn-border-color:#765cf5;--bs-btn-hover-bg:#5f48d7;--bs-btn-hover-border-color:#5f48d7;box-shadow:0 8px 20px #765cf533}
+.btn-outline-light{--bs-btn-color:#fff;--bs-btn-border-color:#8494b3}
+.table-scroll{border:1px solid var(--dsk-line);border-radius:16px;background:#111b30;box-shadow:0 12px 30px #0003}
+.chart-table{--bs-table-bg:#111b30;--bs-table-color:#e9efff;--bs-table-border-color:#2c3b5c;color:#e9efff}
+.chart-table th{background:#263b65!important;color:#fff!important;border-color:#3a4c72!important}
+.chart-table td{background:#111b30;color:#e9efff;border-color:#2c3b5c}
+.chart-table .wk-h{background:#1c2b4a!important;color:#9fe8d5!important}
+.chart-table .wk{color:#f4f6ff}
+.seo-games,.blog-card,.faq,.how-step{border:1px solid var(--dsk-line);border-radius:17px;background:#131e35;color:#dfe7fa;box-shadow:0 10px 25px #0002}
+.seo-game{border-color:#344567;background:#182642;color:#fff}
+.faq h3,.how-step h3{color:#fff}
+.site-footer{margin-top:40px;border-top:1px solid #2c3b5c;background:#080e1d;color:#e8edfb}
+.footer-games{background:#111b30!important;color:#fff}
+.footer-games .text-success{color:#78e3c3!important}
+.footer-main{background:#0d162a;color:#e8edfb}
+.footer-main .muted,.footer-bottom .disclaimer{color:#a8b5cf}
+.footer-main a{color:#b6caff}
+.footer-bottom{border-top:1px solid #263552;color:#9eacc7}
+.footer-bottom .copy{color:#b8c4dc}
+.wa-float{background:linear-gradient(135deg,#28d28c,#099a68);box-shadow:0 12px 28px #079d6a55}
+@media(max-width:767.98px){
+ .header-row{min-height:64px}
+ .live-hero{width:calc(100% - 20px);padding:14px;border-radius:19px}
+ .live-box{padding:16px}
+ .home-intro .display-4{font-size:clamp(2.1rem,10vw,3.4rem)}
+ .footer-main{gap:22px}
+ .nav-mobile{position:sticky;top:0;z-index:15}
+}
+@media(max-width:380px){
+ .ticker-date{font-size:10px}
+ .live-hero{width:calc(100% - 14px);padding:10px}
+ .chart-table th,.chart-table td{padding:7px 5px;font-size:11px}
+}
+@media(prefers-reduced-motion:reduce){html{scroll-behavior:auto}*,*::before,*::after{animation-duration:.01ms!important;transition-duration:.01ms!important}}
