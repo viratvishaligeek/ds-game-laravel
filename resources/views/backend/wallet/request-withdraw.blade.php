@@ -469,9 +469,9 @@
                 $count.attr('data-count', total).text(total + ' Total');
                 $row.fadeOut(140, function () {
                     $(this).remove();
-                    if ($('[data-wallet-request-row]').length === 0) window.location.reload();
                 });
-                notify('success', 'Request processed', message || 'Wallet request processed successfully.');
+                Promise.resolve(notify('success', 'Request processed', message || 'Wallet request processed successfully.'))
+                    .then(() => window.location.reload());
             };
 
             $(document).on('click.adminWalletRequests', '.view-proof-btn', function () {
