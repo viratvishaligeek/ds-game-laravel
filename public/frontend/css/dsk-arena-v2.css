@@ -84,3 +84,74 @@ a{color:#9db9ff;text-underline-offset:3px}
  .chart-table th,.chart-table td{padding:7px 5px;font-size:11px}
 }
 @media(prefers-reduced-motion:reduce){html{scroll-behavior:auto}*,*::before,*::after{animation-duration:.01ms!important;transition-duration:.01ms!important}}
+
+/* Inner-page polish: preserve existing Blade content while applying the arena theme. */
+.section{
+  width:min(1180px,calc(100% - 32px));margin:0 auto;padding:clamp(28px,4vw,52px) 0;
+  color:var(--dsk-ink);
+}
+.section.alt{border-radius:24px;background:linear-gradient(145deg,#111c34,#162442);padding-inline:clamp(14px,3vw,28px)}
+.section h1,.section h2,.section h3,.blog-card h2,.faq h3{
+  color:#fff;font-family:Oswald,Inter,sans-serif;font-weight:700;letter-spacing:.01em;
+}
+.section p,.section .muted,.blog-card p,.faq p{color:var(--dsk-muted)}
+.blog-card,.faq,.how-step{
+  border:1px solid var(--dsk-line);border-radius:18px;background:linear-gradient(150deg,#172642,#111b30);
+  color:#e9efff;box-shadow:0 14px 32px #0003;
+}
+.blog-card{padding:clamp(17px,3vw,26px)}
+.blog-card .stat-row{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px;margin-top:20px}
+.blog-card .stat-row>div{padding:13px;border:1px solid #344567;border-radius:13px;background:#101b32}
+.blog-card .stat-row .v{color:#ffd36f;font:700 26px Oswald,Inter,sans-serif}
+.faq{padding:8px 16px}
+.faq details{border-bottom:1px solid #2c3b5c;padding:14px 0}
+.faq details:last-child{border-bottom:0}
+.faq summary{cursor:pointer;color:#fff;font-weight:800;line-height:1.5}
+.faq details[open] summary{color:#8ee8ce}
+.faq details p{margin:10px 0 0;line-height:1.7}
+.how-step{display:flex;align-items:flex-start;gap:14px;padding:16px;margin:10px 0}
+.how-step .num{display:grid;place-items:center;flex:0 0 38px;height:38px;border-radius:12px;background:#283b63;color:#ffd36f;font:700 15px Oswald}
+.how-step h3{margin:2px 0 6px;font-size:17px}
+.how-step p{margin:0;color:#aebbd3}
+.seo-games{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;padding:15px}
+.seo-game{display:flex;align-items:center;gap:12px;min-width:0;padding:13px;border:1px solid #344567;border-radius:14px;background:#182642;color:#fff;text-decoration:none;transition:transform .18s,border-color .18s,background .18s}
+.seo-game:hover{transform:translateY(-2px);border-color:#7d70d8;background:#202f52;color:#fff}
+.seo-game .mark{display:grid;place-items:center;flex:0 0 40px;width:40px;height:40px;border-radius:12px;background:linear-gradient(145deg,#765cf5,#315be8);color:#fff;font-weight:900}
+.seo-game .t{color:#fff;font-weight:850}
+.seo-game .muted{color:#9eacc7!important}
+.community-post-body{color:#e6ecfb;line-height:1.8;white-space:pre-line;overflow-wrap:anywhere}
+.community-post-body a{color:#9db9ff}
+.card .text-body-secondary,.text-body-secondary{color:#a7b5d0!important}
+.invalid-feedback{color:#ff9bab}
+.form-control::placeholder{color:#8292b2}
+.form-check-input{border-color:#526487;background-color:#0e1830}
+.form-check-input:checked{border-color:#20c997;background-color:#168b70}
+.alert{border-radius:14px}
+.alert-success{border-color:#236c5d;background:#123c35;color:#8df0d1}
+.alert-warning{border-color:#795d2d;background:#45351d;color:#ffda8a}
+.alert-danger{border-color:#8b4659;background:#492631;color:#ffb0bf}
+.badge.text-bg-primary{background:linear-gradient(120deg,#765cf5,#315be8)!important}
+.table-scroll{max-width:100%;overflow-x:auto;overscroll-behavior-inline:contain}
+.chart-table{min-width:520px}
+.chart-table a{color:#d6d0ff;font-weight:800;text-decoration:none}
+.chart-table a:hover{color:#ffe08a}
+.home-intro .container,.live-hero,.hero-inner,.lrb-inner{max-width:1180px}
+.home-intro-panel{border-radius:20px!important}
+.share-row button,.share-row a{min-height:40px;padding:9px 13px;border:1px solid #405478;background:#1a2a49;color:#eaf0ff}
+.share-row button:hover,.share-row a:hover{border-color:#8b70ff;background:#283b63;color:#fff}
+.wa-modal-card{border:1px solid #344567;border-radius:20px;background:#131e35;color:#f4f6ff;box-shadow:0 24px 70px #0008}
+.wa-modal-head{border-bottom:1px solid #2c3b5c;color:#fff}
+.wa-modal-body{color:#dfe7fa}
+@media(max-width:767.98px){
+  .section{width:calc(100% - 22px);padding-block:24px}
+  .seo-games{grid-template-columns:1fr;padding:10px}
+  .blog-card .stat-row{gap:7px}
+  .blog-card .stat-row>div{padding:10px}
+  .blog-card .stat-row .v{font-size:22px}
+  .how-step{padding:13px}
+}
+@media(max-width:380px){
+  .section{width:calc(100% - 16px)}
+  .blog-card .stat-row{grid-template-columns:1fr}
+  .chart-table{min-width:480px}
+}
