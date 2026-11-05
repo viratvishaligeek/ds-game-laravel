@@ -90,9 +90,7 @@
 
                 <div class="col-auto">
 
-                    <span class="badge bg-danger-soft text-danger px-3 py-2">
-                        {{ $requests->total() }} Total
-                    </span>
+                    <span id="request-total-count" data-count="{{ $requests->total() }}" class="badge bg-danger-soft text-danger px-3 py-2 px-3 py-2">{{ $requests->total() }} Total</span>
 
                 </div>
 
@@ -173,8 +171,7 @@
                     <tbody>
 
                         @forelse ($requests as $request)
-                            <tr>
-
+                            <tr data-wallet-request-row="{{ $request->id }}">
                                 {{-- Serial --}}
                                 <td>
                                     #{{ $loop->iteration }}
@@ -460,59 +457,105 @@
         $(function () {
             if (window.feather) window.feather.replace();
 
-            // Delegated bindings survive DataTable redraws and pagination updates.
-            $(document).on('click.adminWithdrawRequests', '.view-proof-btn', function () {
-                const imageUrl = $(this).data('image');
+            const notify = (icon, title, text) => {
+                if (window.Swal?.fire) return window.Swal.fire({ icon, title, text });
+                window.alert(text || title);
+            };
+            const removeProcessedRow = (requestId, message) => {
+                const $row = $('[data-wallet-request-row="' + requestId + '"]');
+                if (!$row.length) return;
+                const $count = $('#request-total-count');
+                const total = Math.max(0, Number($count.attr('data-count') || 0) - 1);
+                $count.attr('data-count', total).text(total + ' Total');
+                $row.fadeOut(140, function () {
+                    $(this).remove();
+                    if ($('[data-wallet-request-row]').length === 0) window.location.reload();
+                });
+                notify('success', 'Request processed', message || 'Wallet request processed successfully.');
+            };
+
+            $(document).on('click.adminWalletRequests', '.view-proof-btn', function () {
                 const $image = $('#proofImage');
                 $image.off('error.adminProof').on('error.adminProof', function () {
-                    $(this).attr('alt', 'Withdrawal proof image is unavailable').removeAttr('src');
-                });
-                $image.attr('src', imageUrl || '');
+                    $(this).attr('alt', 'Payment proof image is unavailable').removeAttr('src');
+                }).attr('src', $(this).data('image') || '');
             });
 
-            $(document).on('click.adminWithdrawRequests', '.approve-btn', function (event) {
+            $(document).on('click.adminWalletRequests', '.approve-btn', async function (event) {
                 event.preventDefault();
                 const $button = $(this);
                 const form = $button.closest('form').get(0);
                 if (!form || $button.prop('disabled')) return;
+                const confirmation = window.Swal?.fire
+                    ? await window.Swal.fire({
+                        title: 'Approve Wallet Request?',
+                        text: 'Approve ₹' + String($button.data('amount') || '') + ' for ' + String($button.data('name') || 'this user') + '?',
+                        icon: 'question',
+                        showCancelButton: true,
+                        confirmButtonText: 'Yes, approve',
+                        cancelButtonText: 'Cancel',
+                        reverseButtons: true
+                    })
+                    : { isConfirmed: window.confirm('Approve this wallet request?') };
+                if (!confirmation.isConfirmed) return;
 
-                const submitApproval = () => {
-                    $button.prop('disabled', true);
-                    form.submit();
-                };
-
-                if (!window.Swal || typeof window.Swal.fire !== 'function') {
-                    if (window.confirm('Approve this withdrawal?')) submitApproval();
-                    return;
+                $button.prop('disabled', true);
+                try {
+                    const response = await $.ajax({
+                        url: form.action,
+                        method: 'POST',
+                        data: $(form).serialize(),
+                        dataType: 'json',
+                        headers: { Accept: 'application/json', 'X-Requested-With': 'XMLHttpRequest' }
+                    });
+                    if (!response?.success || !response.data?.request_id) throw new Error(response?.message || 'Approval was not confirmed by the server.');
+                    removeProcessedRow(response.data.request_id, response.message);
+                } catch (error) {
+                    const payload = error.responseJSON || {};
+                    const detail = payload.errors ? Object.values(payload.errors).flat()[0] : null;
+                    notify('error', 'Approval failed', detail || payload.message || (error.status === 419 ? 'Your session expired. Refresh the page and try again.' : 'The request could not be approved.'));
+                } finally {
+                    $button.prop('disabled', false);
                 }
-
-                window.Swal.fire({
-                    title: 'Approve Withdrawal?',
-                    text: 'Approve withdrawal of ₹' + String($button.data('amount') || '') + ' for ' + String($button.data('name') || 'this user') + '?',
-                    icon: 'warning',
-                    showCancelButton: true,
-                    confirmButtonText: 'Yes, approve',
-                    cancelButtonText: 'Cancel',
-                    confirmButtonColor: '#1cc88a',
-                    reverseButtons: true
-                }).then(result => {
-                    if (result.isConfirmed) submitApproval();
-                });
             });
 
-            $(document).on('click.adminWithdrawRequests', '.reject-btn', function () {
+            $(document).on('click.adminWalletRequests', '.reject-btn', function () {
                 const $button = $(this);
                 $('#rejectUserName').text($button.data('name') || 'User');
-                $('#rejectForm').attr('action', $button.data('action') || '');
+                $('#rejectForm').attr('action', $button.data('action') || '').attr('data-request-id', $button.data('id') || '');
                 $('#rejectForm [name="admin_remark"]').val('');
             });
 
-            $('#rejectForm').on('submit.adminWithdrawRequests', function (event) {
-                const action = $(this).attr('action');
-                const remark = String($(this).find('[name="admin_remark"]').val() || '').trim();
-                if (!action || !remark) {
-                    event.preventDefault();
-                    window.Swal?.fire({ icon: 'warning', title: 'Rejection reason required', text: 'Enter a reason before rejecting this request.' });
+            $('#rejectForm').on('submit.adminWalletRequests', async function (event) {
+                event.preventDefault();
+                const $form = $(this);
+                const action = $form.attr('action');
+                const requestId = $form.attr('data-request-id');
+                const remark = String($form.find('[name="admin_remark"]').val() || '').trim();
+                if (!action || !requestId || !remark) {
+                    notify('warning', 'Rejection reason required', 'Enter a reason before rejecting this request.');
+                    return;
+                }
+                const $button = $form.find('[type="submit"]');
+                if ($button.prop('disabled')) return;
+                $button.prop('disabled', true);
+                try {
+                    const response = await $.ajax({
+                        url: action,
+                        method: 'POST',
+                        data: $form.serialize(),
+                        dataType: 'json',
+                        headers: { Accept: 'application/json', 'X-Requested-With': 'XMLHttpRequest' }
+                    });
+                    if (!response?.success || !response.data?.request_id) throw new Error(response?.message || 'Rejection was not confirmed by the server.');
+                    if (window.bootstrap) bootstrap.Modal.getOrCreateInstance($('#rejectModal').get(0)).hide();
+                    removeProcessedRow(response.data.request_id, response.message);
+                } catch (error) {
+                    const payload = error.responseJSON || {};
+                    const detail = payload.errors ? Object.values(payload.errors).flat()[0] : null;
+                    notify('error', 'Rejection failed', detail || payload.message || (error.status === 419 ? 'Your session expired. Refresh the page and try again.' : 'The request could not be rejected.'));
+                } finally {
+                    $button.prop('disabled', false);
                 }
             });
         });
