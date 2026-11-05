@@ -8,6 +8,7 @@ use App\Models\Admin;
 use App\Models\User;
 use App\Models\WalletRequest;
 use App\Services\ReferralService;
+use App\Services\Admin\UserBidActivityService;
 use App\Services\WalletService;
 use App\Services\PushNotificationService;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -32,7 +33,10 @@ class AdminTableActionsTest extends TestCase
         $request = Request::create('/admin/users/' . $user->id . '/toggle-status', 'PATCH');
         $request->headers->set('Accept', 'application/json');
 
-        $response = (new UserController())->toggleStatus($request, (string) $user->id);
+        $response = (new UserController(
+            Mockery::mock(WalletService::class),
+            Mockery::mock(UserBidActivityService::class)
+        ))->toggleStatus($request, (string) $user->id);
 
         $this->assertSame(200, $response->getStatusCode());
         $this->assertTrue($response->getData(true)['success']);
