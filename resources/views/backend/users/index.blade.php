@@ -368,18 +368,6 @@
                 }
             });
 
-            $(document).on('click.adminUsers', '.delete-user-btn', async function (event) {
-                event.preventDefault();
-                const $button = $(this);
-                const id = Number($button.data('id'));
-                const form = $('#delete-form-' + id).get(0);
-                if (!form) return;
-                const result = window.Swal?.fire
-                    ? await window.Swal.fire({ title: 'Delete user?', text: 'This action cannot be undone.', icon: 'warning', showCancelButton: true, confirmButtonText: 'Delete', confirmButtonColor: '#dc3545' })
-                    : { isConfirmed: window.confirm('Delete this user?') };
-                if (result.isConfirmed) form.submit();
-            });
-
             $(window).on('admin:user-presence.adminUsers', function (event) {
                 const presence = event.originalEvent?.detail || event.detail || {};
                 const userId = Number(presence.user_id);
