@@ -6,7 +6,22 @@ use Illuminate\Database\Eloquent\Model;
 
 class Notification extends Model
 {
-    // Notification history retention is handled by NotificationService.
+    protected static function booted(): void
+    {
+        static::created(function (Notification $notification): void {
+            // Retain the newest ten records for each user; older records are no longer part of the in-app history.
+            $olderIds = static::query()
+                ->where('user_id', $notification->user_id)
+                ->orderByDesc('id')
+                ->skip(10)
+                ->pluck('id');
+
+            if ($olderIds->isNotEmpty()) {
+                static::query()->whereIn('id', $olderIds)->delete();
+            }
+        });
+    }
+
     protected $primaryKey = 'id';
     public $timestamps = true;
     protected $guarded = ['id'];
@@ -16,5 +31,4 @@ class Notification extends Model
         'subject',
         'message',
     ];
-
 }
