@@ -79,4 +79,44 @@ class AdminTableActionsTest extends TestCase
         ]);
         $this->assertTrue($walletRequest->fresh()->adminProcessor->is($admin));
     }
+
+    public function test_withdrawal_approval_uses_the_debit_service_and_admin_processor(): void
+    {
+        $admin = Admin::query()->create([
+            'name' => 'Withdrawal Approver',
+            'email' => 'withdrawal-approver@example.test',
+            'password' => 'test-password',
+            'status' => 'active',
+        ]);
+        Auth::guard('admin')->setUser($admin);
+
+        $user = User::factory()->create(['status' => 'active', 'balance' => 250]);
+        $walletRequest = WalletRequest::query()->create([
+            'user_id' => $user->id,
+            'request_type' => 'debit',
+            'payment_method' => 'bank',
+            'amount' => 100,
+            'status' => 'pending',
+        ]);
+
+        $walletService = Mockery::mock(WalletService::class);
+        $walletService->shouldReceive('debit')->once();
+        $referralService = Mockery::mock(ReferralService::class);
+        $referralService->shouldNotReceive('recordSuccessfulDeposit');
+
+        $request = Request::create('/admin/wallet/requests/' . $walletRequest->id . '/approve', 'POST');
+        $request->headers->set('Accept', 'application/json');
+
+        $response = (new WalletRequestController($walletService, $referralService))
+            ->approve($request, $walletRequest);
+
+        $this->assertSame(200, $response->getStatusCode());
+        $this->assertTrue($response->getData(true)['success']);
+        $this->assertDatabaseHas('wallet_requests', [
+            'id' => $walletRequest->id,
+            'request_type' => 'debit',
+            'status' => 'approved',
+            'processed_by_admin_id' => $admin->id,
+        ]);
+    }
 }
