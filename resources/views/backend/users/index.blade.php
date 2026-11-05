@@ -392,38 +392,6 @@
                 }
             });
 
-            $(document).on('click.adminUsers', '.delete-user-btn', async function (event) {
-                event.preventDefault();
-                const $button = $(this);
-                if ($button.prop('disabled')) return;
-
-                const userId = Number($button.data('id'));
-                const userName = String($button.data('name') || 'this user');
-                const form = $('#delete-form-' + userId).get(0);
-                if (!form) {
-                    await notify('error', 'Action unavailable', 'The user deletion form could not be found.');
-                    return;
-                }
-
-                const confirmation = window.Swal?.fire
-                    ? await window.Swal.fire({
-                        title: 'Delete user?',
-                        text: 'Delete ' + userName + '? This action cannot be undone.',
-                        icon: 'warning',
-                        showCancelButton: true,
-                        confirmButtonText: 'Yes, delete user',
-                        cancelButtonText: 'Cancel',
-                        confirmButtonColor: '#dc3545',
-                        reverseButtons: true
-                    })
-                    : { isConfirmed: window.confirm('Delete ' + userName + '? This action cannot be undone.') };
-
-                if (!confirmation.isConfirmed) return;
-                $button.prop('disabled', true);
-                // Keep the existing CSRF-protected DELETE form and backend route.
-                form.submit();
-            });
-
             $(window).on('admin:user-presence.adminUsers', function (event) {
                 const presence = event.originalEvent?.detail || event.detail || {};
                 const userId = Number(presence.user_id);
