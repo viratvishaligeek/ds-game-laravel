@@ -82,6 +82,7 @@
                         <th>City</th>
                         <th>Balance</th>
                         <th>Status</th>
+                        <th>Live Presence</th>
                         <th>Created At</th>
                         <th>Actions</th>
                     </tr>
