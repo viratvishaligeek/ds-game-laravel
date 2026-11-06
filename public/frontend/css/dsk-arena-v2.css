@@ -54,9 +54,9 @@ a{color:#9db9ff;text-underline-offset:3px}
 .btn-outline-light{--bs-btn-color:#fff;--bs-btn-border-color:#8494b3}
 .table-scroll{border:1px solid var(--dsk-line);border-radius:16px;background:#111b30;box-shadow:0 12px 30px #0003}
 .chart-table{--bs-table-bg:#111b30;--bs-table-color:#e9efff;--bs-table-border-color:#2c3b5c;color:#e9efff}
-.chart-table th{background:#263b65!important;color:#fff!important;border-color:#3a4c72!important}
+.chart-table th{background:darkgreen!important;color:#fff!important;border-color:#3a4c72!important}
 .chart-table td{background:#111b30;color:#e9efff;border-color:#2c3b5c}
-.chart-table .wk-h{background:#1c2b4a!important;color:#9fe8d5!important}
+.chart-table .wk-h{background:#1c2b4a!important;}
 .chart-table .wk{color:#f4f6ff}
 .seo-games,.blog-card,.faq,.how-step{border:1px solid var(--dsk-line);border-radius:17px;background:#131e35;color:#dfe7fa;box-shadow:0 10px 25px #0002}
 .seo-game{border-color:#344567;background:#182642;color:#fff}
@@ -132,8 +132,8 @@ a{color:#9db9ff;text-underline-offset:3px}
 .alert-danger{border-color:#8b4659;background:#492631;color:#ffb0bf}
 .badge.text-bg-primary{background:linear-gradient(120deg,#765cf5,#315be8)!important}
 .table-scroll{max-width:100%;overflow-x:auto;overscroll-behavior-inline:contain}
-.chart-table{min-width:520px}
-.chart-table a{color:#d6d0ff;font-weight:800;text-decoration:none}
+/* .chart-table{min-width:520px} */
+.chart-table a{color:#fff;font-weight:800;text-decoration:none}
 .chart-table a:hover{color:#ffe08a}
 .home-intro .container,.live-hero,.hero-inner,.lrb-inner{max-width:1180px}
 .home-intro-panel{border-radius:20px!important}
@@ -153,7 +153,7 @@ a{color:#9db9ff;text-underline-offset:3px}
 @media(max-width:380px){
   .section{width:calc(100% - 16px)}
   .blog-card .stat-row{grid-template-columns:1fr}
-  .chart-table{min-width:480px}
+  /* .chart-table{min-width:480px} */
 }
 
 /* Bootstrap utilities and native controls use the Disawar arena palette. */

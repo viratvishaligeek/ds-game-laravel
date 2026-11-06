@@ -9,7 +9,7 @@
     --border: #3d3a66;
     --header-bg: linear-gradient(135deg, #ae2208 0%, #c96c00 100%);
     --hero-bg: linear-gradient(160deg, #0a0e2e 0%, #12006b 30%, #2d0060 55%, #5c0080 75%, #8b0050 90%, #c0392b 100%);
-    --font-sans: "Inter", system-ui, sans-serif;
+    --font-sans: "Oswald",sans-serif;
     --font-heading: "Oswald", system-ui, sans-serif;
     --game-db-card: linear-gradient(145deg, #2d0a0a 0%, #5c1010 60%, #8b1a1a 100%);
     --game-db-badge: linear-gradient(135deg, #e53935, #c62828);
@@ -66,6 +66,7 @@ body {
     color: var(--fg);
     font-family: var(--font-sans);
     line-height: 1.5;
+    letter-spacing: .02em;
 }
 
 h1,
@@ -1282,12 +1283,11 @@ html {
 
 .chart-table .wk,
 .chart-table .wk-h {
-    text-align: left;
-    padding-left: 12px;
-    color: #7eb3ff;
-    font-size: 12px;
+    text-align: center;
+    color: white;
+    font-size: 14px;
     white-space: nowrap;
-    width: 80px;
+    width: 30px;
     border-right: 1px solid rgba(59, 111, 217, .25);
 }
 
@@ -4328,7 +4328,7 @@ html {
 
 @media (max-width: 575.98px) {
     .home-intro #home-intro-title {
-        font-size: clamp(2.1rem, 10vw, 3rem);
+        font-size: clamp(2.1rem, 8vw, 3rem);
     }
 
     .home-intro .lead {
