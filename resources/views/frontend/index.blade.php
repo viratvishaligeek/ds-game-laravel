@@ -85,7 +85,12 @@
 
     <section class="live-hero">
         @if (!empty($featuredGame))
-            <div class="live-box">
+            <div class="live-box"
+                data-featured-game-id="{{ $featuredGame['id'] }}"
+                data-chart-data-url="{{ route('charts.data') }}"
+                data-featured-today-date="{{ now()->timezone(config('app.timezone'))->format('Y-m-d') }}"
+                data-featured-yesterday-date="{{ now()->timezone(config('app.timezone'))->copy()->subDay()->format('Y-m-d') }}">
+                <span class="featured-live-indicator" aria-label="Live result updates"></span>
                 <div class="gname">{{ $featuredGame['name'] }}</div>
                 <div class="gnum">
                     {{ ($featuredGame['latest_result'] ?? '--') !== '--' ? $featuredGame['latest_result'] : '—' }}</div>
@@ -94,18 +99,18 @@
                     href="{{ route('frontend.market', ['slug' => $featuredGame['slug']]) }}"
                     aria-label="View {{ $featuredGame['name'] }} result history">View market history <i
                         class="bi bi-arrow-right" aria-hidden="true"></i></a>
-                <div class="row mt-2">
+                <div class="row mt-2 featured-result-days">
                     <div class="col-6">
                         <div class="sub">{ कल }</div>
-                        <div class="gname">
+                        <div class="gname" data-featured-result="yesterday">
                             {{ ($featuredGame['yesterday'] ?? '--') !== '--' ? $featuredGame['yesterday'] : '—' }}</div>
-
                     </div>
                     <div class="col-6">
                         <div class="sub">{ आज }</div>
-                        <div class="gname">{{ ($featuredGame['today'] ?? '--') !== '--' ? $featuredGame['today'] : '—' }}
-                        </div>
+                        <div class="gname" data-featured-result="today">
+                            {{ ($featuredGame['today'] ?? '--') !== '--' ? $featuredGame['today'] : '—' }}</div>
                     </div>
+                    <span class="featured-live-separator" aria-hidden="true"></span>
                 </div>
             </div>
         @else
