@@ -246,21 +246,43 @@ class UserController extends Controller
         return redirect()->route('admin.users.index')->with('success', 'User updated successfully.');
     }
 
-    public function toggleStatus(string $id)
+    public function toggleStatus(Request $request, string $id)
     {
         try {
-            $user = User::findOrFail($id);
+            $user = User::query()->findOrFail($id);
             $user->status = ($user->status === 'active') ? 'inactive' : 'active';
             $user->save();
 
+            // Revoke existing sessions/tokens immediately when an account is deactivated.
             if ($user->status !== 'active') {
                 $user->tokens()->delete();
             }
 
-            $msg = $user->status === 'active' ? 'User Unblocked / Activated successfully.' : 'User Blocked / Deactivated successfully.';
-            return redirect()->back()->with('success', $msg);
+            $message = $user->status === 'active'
+                ? 'User Unblocked / Activated successfully.'
+                : 'User Blocked / Deactivated successfully.';
+
+            if ($request->expectsJson()) {
+                return response()->json([
+                    'success' => true,
+                    'message' => $message,
+                    'data' => [
+                        'user_id' => $user->id,
+                        'status' => $user->status,
+                    ],
+                ]);
+            }
+
+            return redirect()->back()->with('success', $message);
         } catch (\Throwable $e) {
             report($e);
+
+            if ($request->expectsJson()) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Unable to update user status. Please try again.',
+                ], 500);
+            }
 
             return redirect()->back()->with('error', 'Unable to update user status. Please try again.');
         }

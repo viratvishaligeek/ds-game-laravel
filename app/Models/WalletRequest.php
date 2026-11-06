@@ -26,6 +26,11 @@ class WalletRequest extends Model
         return $this->belongsTo(User::class, 'processed_by');
     }
 
+    public function adminProcessor(): BelongsTo
+    {
+        return $this->belongsTo(Admin::class, 'processed_by_admin_id');
+    }
+
     public function isCredit()
     {
         return $this->request_type === 'credit';

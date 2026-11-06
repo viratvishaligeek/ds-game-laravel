@@ -27,14 +27,7 @@ Route::get('/firebase-config.js', function () {
 });
 
 
-Route::get('/optimize-clear', function () {
-    Artisan::call('optimize:clear');
-
-    return response()->json([
-        'success' => true,
-        'message' => 'Application cache cleared successfully.',
-    ]);
-});
+// Cache and deployment maintenance commands are intentionally not exposed over public HTTP.
 
 // Route::get('/storage-link', function () {
 //     Artisan::call('storage:link');
