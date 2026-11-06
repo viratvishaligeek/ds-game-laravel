@@ -505,3 +505,78 @@ document.querySelectorAll('[data-prev-toggle]').forEach(function (btn) {
   }, { threshold: 0.08, rootMargin: '0px 0px -8% 0px' });
   Array.prototype.forEach.call(nodes, function (el) { io.observe(el); });
 })();
+
+/* Refresh the featured Yesterday/Today values from the public monthly chart data.
+   The chart endpoint keys each result by its calendar date, so the two labels cannot
+   accidentally read the same business-day fallback value. */
+(function () {
+  var box = document.querySelector('.live-box[data-featured-game-id][data-chart-data-url]');
+  if (!box) return;
+
+  var gameId = Number(box.dataset.featuredGameId);
+  var todayDate = box.dataset.featuredTodayDate;
+  var yesterdayDate = box.dataset.featuredYesterdayDate;
+  var chartDataUrl = box.dataset.chartDataUrl;
+
+  if (!Number.isInteger(gameId) || gameId <= 0 || !todayDate || !yesterdayDate || !chartDataUrl) return;
+
+  function dateParts(date) {
+    var parts = date.split('-').map(Number);
+    return parts.length === 3 && parts.every(Number.isFinite)
+      ? { year: parts[0], month: parts[1] }
+      : null;
+  }
+
+  function loadMonth(date) {
+    var parts = dateParts(date);
+    if (!parts) return Promise.resolve(null);
+
+    var url = new URL(chartDataUrl, window.location.href);
+    url.searchParams.set('year', String(parts.year));
+    url.searchParams.set('month', String(parts.month));
+    url.searchParams.set('_', String(Date.now()));
+
+    return fetch(url.toString(), {
+      method: 'GET',
+      cache: 'no-store',
+      headers: { Accept: 'application/json', 'Cache-Control': 'no-cache' }
+    }).then(function (response) {
+      if (!response.ok) throw new Error('Unable to refresh featured results');
+      return response.json();
+    });
+  }
+
+  var dates = [yesterdayDate, todayDate];
+  var months = Array.from(new Set(dates.map(function (date) {
+    var parts = dateParts(date);
+    return parts ? parts.year + '-' + parts.month : '';
+  }).filter(Boolean)));
+
+  Promise.all(months.map(function (key) {
+    var parts = key.split('-').map(Number);
+    return loadMonth(parts[0] + '-' + String(parts[1]).padStart(2, '0') + '-01');
+  })).then(function (payloads) {
+    var rowsByDate = new Map();
+    payloads.forEach(function (payload) {
+      (payload && Array.isArray(payload.rows) ? payload.rows : []).forEach(function (row) {
+        rowsByDate.set(row.date, row);
+      });
+    });
+
+    ['yesterday', 'today'].forEach(function (period) {
+      var date = period === 'today' ? todayDate : yesterdayDate;
+      var row = rowsByDate.get(date);
+      var result = row && Array.isArray(row.values)
+        ? row.values.find(function (item) { return Number(item.game_id) === gameId; })
+        : null;
+      var target = box.querySelector('[data-featured-result="' + period + '"]');
+
+      if (target && result) {
+        target.textContent = result.number == null || result.number === '' ? '—' : String(result.number);
+      }
+    });
+  }).catch(function () {
+    // Keep the server-rendered values visible if the chart endpoint is unavailable.
+  });
+})();
+
