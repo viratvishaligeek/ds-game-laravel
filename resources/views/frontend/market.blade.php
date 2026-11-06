@@ -64,17 +64,7 @@
             <p class="mt-4"><a class="btn"
                     href="{{ route('charts.index', ['game_id' => $game->id, 'year' => $year, 'month' => $month]) }}">Open
                     interactive charts</a></p>
-            @if ($faqs->isNotEmpty())
-                <section class="faq mt-5">
-                    <h2 class="h4">{{ $game->name }} FAQs</h2>
-                    @foreach ($faqs as $faq)
-                        <details>
-                            <summary>{{ $faq->question }}</summary>
-                            <p class="muted">{{ $faq->answer }}</p>
-                        </details>
-                    @endforeach
-                </section>
-            @endif
+
         </div>
     </section>
 @endsection
@@ -108,21 +98,7 @@
                 ],
             ],
         ];
-        if ($faqs->isNotEmpty()) {
-            $marketSchema['@graph'][] = [
-                '@type' => 'FAQPage',
-                'mainEntity' => $faqs
-                    ->map(
-                        fn($faq) => [
-                            '@type' => 'Question',
-                            'name' => strip_tags((string) $faq->question),
-                            'acceptedAnswer' => ['@type' => 'Answer', 'text' => strip_tags((string) $faq->answer)],
-                        ],
-                    )
-                    ->values()
-                    ->all(),
-            ];
-        }
+
     @endphp
     <script type="application/ld+json">{!! json_encode($marketSchema, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE | JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_AMP | JSON_HEX_QUOT) !!}</script>
 @endpush

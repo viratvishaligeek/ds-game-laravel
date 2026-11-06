@@ -1,6 +1,6 @@
 <footer class="site-footer">
     <div class="text-center footer-games bg-light">
-        <p class="text-success fw-bold">Published Game Results</p>
+        <p class="text-success fw-bold">Monthly Chart</p>
         <div class="footer-game-row">
             @forelse ($frontendResults as $gameResult)
                 <a class="btn btn-outline-success btn-sm"
@@ -9,6 +9,19 @@
             @empty
                 <span class="muted">No active games are configured.</span>
             @endforelse
+        </div>
+         <div class="share-box">
+            <div class="share-label">Share </div>
+            <div class="share-row">
+                <a class="share-wa" href="https://wa.me/?text={{ rawurlencode($siteName . ' — ' . url('/')) }}"
+                    target="_blank" rel="noopener noreferrer">WhatsApp</a>
+                <a class="share-fb" href="https://www.facebook.com/sharer/sharer.php?u={{ rawurlencode(url('/')) }}"
+                    target="_blank" rel="noopener noreferrer">Facebook</a>
+                <a class="share-x"
+                    href="https://x.com/intent/tweet?text={{ rawurlencode($siteName . ' results') }}&url={{ rawurlencode(url('/')) }}"
+                    target="_blank" rel="noopener noreferrer">X</a>
+                <button type="button" class="share-copy" data-copy="{{ url('/') }}">Copy Link</button>
+            </div>
         </div>
     </div>
 
@@ -34,24 +47,18 @@
             </div>
         </div>
         <div class="d-flex flex-row flex-wrap gap-2">
-            <a class="btn btn-outline-primary btn-sm" href="{{ route('index') }}">Home</a>
-            <a class="btn btn-outline-primary btn-sm" href="{{ route('charts.index') }}">Monthly charts</a>
-            <a class="btn btn-outline-primary btn-sm" href="{{ route('community.index') }}">Community discussions</a>
-            <a class="btn btn-outline-primary btn-sm" href="{{ route('information', ['page' => 'about']) }}">About</a>
-            <a class="btn btn-outline-primary btn-sm"
+            <a class="border btn-sm" href="{{ route('index') }}">Home</a>
+            <a class="border btn-sm" href="{{ route('charts.index') }}">Monthly charts</a>
+            <a class="border btn-sm" href="{{ route('community.index') }}">Community discussions</a>
+            <a class="border btn-sm" href="{{ route('information', ['page' => 'about']) }}">About</a>
+            <a class="border btn-sm"
                 href="{{ route('information', ['page' => 'contact']) }}">Contact</a>
-            <a class="btn btn-outline-primary btn-sm" href="{{ route('information', ['page' => 'faq']) }}">FAQ</a>
-            <a class="btn btn-outline-primary btn-sm"
+            <a class="border btn-sm" href="{{ route('information', ['page' => 'faq']) }}">FAQ</a>
+            <a class="border btn-sm"
                 href="{{ route('information', ['page' => 'privacy-policy']) }}">Privacy policy</a>
-            <a class="btn btn-outline-primary btn-sm"
+            <a class="border btn-sm"
                 href="{{ route('information', ['page' => 'terms-and-conditions']) }}">Terms and conditions</a>
-            @foreach ($frontendResults as $gameResult)
-                <a class="btn btn-outline-primary btn-sm"
-                    href="{{ route('frontend.market', ['slug' => $gameResult['slug']]) }}"><span
-                        class="gold">▸</span>
-                    {{ $gameResult['name'] }} <span class="muted">{{ $gameResult['time'] }}</span></a>
-            @endforeach
-            <a class="btn btn-outline-primary btn-sm" target="_blank" href="{{ route('sitemap') }}">
+            <a class="border btn-sm" target="_blank" href="{{ route('sitemap') }}">
                 Sitemap
             </a>
         </div>

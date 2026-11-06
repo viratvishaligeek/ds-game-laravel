@@ -40,7 +40,7 @@ a{color:#9db9ff;text-underline-offset:3px}
 .hero-card .name{color:#fff}
 .lrb-section{color:#f4f6ff}
 .lrb-heading,.section h2,.section h3{font-family:Oswald,sans-serif;color:#fff;letter-spacing:.01em}
-.lrb-card{border:1px solid var(--dsk-line);border-radius:18px;background:linear-gradient(150deg,#1a2947,#111b30);color:#f4f6ff;box-shadow:0 12px 28px #0003}
+.lrb-card{border:1px solid var(--dsk-line);border-radius:18px;color:#f4f6ff;box-shadow:0 12px 28px #0003}
 .lrb-card .lrb-name{color:#fff}
 .lrb-card .lrb-badge{border-radius:99px;background:#254c59;color:#8df0d1}
 .section{color:#f4f6ff}

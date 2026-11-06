@@ -85,8 +85,7 @@
 
     <section class="live-hero">
         @if (!empty($featuredGame))
-            <div class="live-box"
-                data-featured-game-id="{{ $featuredGame['id'] }}"
+            <div class="live-box" data-featured-game-id="{{ $featuredGame['id'] }}"
                 data-chart-data-url="{{ route('charts.data') }}"
                 data-featured-today-date="{{ now()->timezone(config('app.timezone'))->format('Y-m-d') }}"
                 data-featured-yesterday-date="{{ now()->timezone(config('app.timezone'))->copy()->subDay()->format('Y-m-d') }}">
@@ -120,20 +119,6 @@
                 <div class="sub">No published result data is available.</div>
             </div>
         @endif
-        <div><span class="badge-live">RESULTS</span> <span class="muted">Database-backed updates</span></div>
-        <div class="share-box">
-            <div class="share-label">Share {{ $siteName }}</div>
-            <div class="share-row">
-                <a class="share-wa" href="https://wa.me/?text={{ rawurlencode($siteName . ' — ' . url('/')) }}"
-                    target="_blank" rel="noopener noreferrer">WhatsApp</a>
-                <a class="share-fb" href="https://www.facebook.com/sharer/sharer.php?u={{ rawurlencode(url('/')) }}"
-                    target="_blank" rel="noopener noreferrer">Facebook</a>
-                <a class="share-x"
-                    href="https://x.com/intent/tweet?text={{ rawurlencode($siteName . ' results') }}&url={{ rawurlencode(url('/')) }}"
-                    target="_blank" rel="noopener noreferrer">X</a>
-                <button type="button" class="share-copy" data-copy="{{ url('/') }}">Copy Link</button>
-            </div>
-        </div>
     </section>
 
     @include('frontend.include.homepage-sections', [
@@ -178,7 +163,7 @@
             <div class="hero-note">Published results are shown from the site's records.</div>
         </div>
     </section>
-
+    <br>
     @include('frontend.include.homepage-sections', [
         'sections' => $homepageSections->get('second_place', collect()),
     ])
@@ -198,23 +183,23 @@
                         <div class="lrb-header">
                             <span class="lrb-name">{{ $gameResult['name'] }}</span>
                             <span
-                                class="lrb-badge {{ $hasResult ? 'lrb-badge--declared' : 'lrb-badge--awaited' }}">{{ $hasResult ? 'Published' : 'Awaiting result' }}</span>
+                                class="lrb-badge {{ $hasResult ? 'lrb-badge--declared' : 'lrb-badge--awaited' }}">{{ $hasResult ? 'Published' : 'Upcoming result' }}</span>
                         </div>
                         <div class="lrb-body">
                             <div class="container row text-center mt-2">
                                 <div class="col-6">
-                                    <div class="">{ कल }</div>
-                                    <p class="fs-1">
+                                    <div class="text-danger">{ कल }</div>
+                                    <p class="fs-1 text-danger">
                                         {{ ($gameResult['yesterday'] ?? '--') !== '--' ? $gameResult['yesterday'] : '—' }}
                                     </p>
-
                                 </div>
                                 <div class="col-6">
-                                    <div class="">{ आज }</div>
-                                    <p class="fs-1">
+                                    <div class="text-success">{ आज }</div>
+                                    <p class="fs-1 text-success">
                                         {{ ($gameResult['today'] ?? '--') !== '--' ? $gameResult['today'] : '—' }}
                                     </p>
                                 </div>
+                                <span class="featured-live-separator" aria-hidden="true"></span>
                             </div>
 
                         </div>
@@ -229,8 +214,8 @@
     @include('frontend.include.homepage-sections', [
         'sections' => $homepageSections->get('second_place_another', collect()),
     ])
-
-    <section class="section alt">
+    <br>
+    <section class="section alt mt-2">
         <div class=" p-0">
             <div class="center">
                 <h2 class="text-dark">{{ $monthLabel }} — Monthly Results Chart</h2>
@@ -281,35 +266,10 @@
         'sections' => $homepageSections->get('third_place', collect()),
     ])
 
-    <section class="section">
-        <div class="">
-            <div class="center">
-                <h2>Available Games</h2>
-                <p class="muted">Choose a game to view its published monthly records and result history.</p>
-            </div>
-            <div class="seo-games" style="margin-top:16px">
-                @forelse ($games as $game)
-                    <a class="seo-game" href="{{ route('frontend.market', ['slug' => $game->slug]) }}">
-                        <div class="mark">
-                            {{ \Illuminate\Support\Str::upper(\Illuminate\Support\Str::substr($game->name, 0, 2)) }}</div>
-                        <div>
-                            <div class="t">{{ $game->name }}</div>
-                            <div class="muted small">
-                                {{ $game->result_time ? \Carbon\Carbon::parse($game->result_time)->format('h:i A') : 'Result time not configured' }}
-                                · View monthly chart and history</div>
-                        </div>
-                    </a>
-                @empty
-                    <p class="muted">No active games have been published yet.</p>
-                @endforelse
-            </div>
-        </div>
-    </section>
-
     @include('frontend.include.homepage-sections', [
         'sections' => $homepageSections->get('third_place_another', collect()),
     ])
-
+    <br>
     <section class="section alt bg-light">
         <div class="" style="max-width:860px">
             <div class="blog-card" style="margin-bottom:32px">
