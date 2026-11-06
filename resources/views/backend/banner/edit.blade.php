@@ -56,6 +56,21 @@
                                 <div class="invalid-feedback">{{ $message }}</div>
                             @enderror
                         </div>
+                         <div class="col-md-8 mb-3">
+                            <label class="small mb-1" for="destinationUrl">Banner URL <span class="text-danger">*</span></label>
+                            <input class="form-control" id="destinationUrl" name="destinationUrl" type="text"
+                                placeholder="e.g. Destination Url" value="{{ old('destinationUrl', $banner->destinationUrl) }}" />
+                        </div>
+
+                        <div class="col-md-4 mb-3">
+                            <label class="small mb-1" for="app_screen">App Screen <span class="text-danger">*</span></label>
+                            <select class="form-select" id="app_screen" name="app_screen">
+                                <option value="top" {{ old('app_screen', $banner->app_screen) === 'top' ? 'selected' : '' }}>Top
+                                </option>
+                                <option value="bottom" {{ old('app_screen', $banner->app_screen) === 'bottom' ? 'selected' : '' }}>Bottom
+                                </option>
+                            </select>
+                        </div>
                     </div>
 
                     <div class="mb-3">
@@ -63,7 +78,7 @@
                                 to keep existing image)</small></label>
                         <input type="file" name="image" id="image"
                             class="form-control @error('image') is-invalid @enderror" accept="image/*"
-                            >
+                            onchange="previewImage(event)">
                         @error('image')
                             <div class="invalid-feedback">{{ $message }}</div>
                         @enderror
@@ -84,16 +99,17 @@
 
 @section('script')
     <script>
-        $(function () {
-            $('#image').on('change', function () {
-                const file = this.files && this.files[0];
-                if (!file) return;
+        function previewImage(event) {
+            const input = event.target;
+            const previewImage = document.getElementById('imagePreview');
+
+            if (input.files && input.files[0]) {
                 const reader = new FileReader();
-                reader.onload = function (event) {
-                    $('#imagePreview').attr('src', event.target.result);
-                };
-                reader.readAsDataURL(file);
-            });
-        });
+                reader.onload = function(e) {
+                    previewImage.src = e.target.result;
+                }
+                reader.readAsDataURL(input.files[0]);
+            }
+        }
     </script>
 @endsection

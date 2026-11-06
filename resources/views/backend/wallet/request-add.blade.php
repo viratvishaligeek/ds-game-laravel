@@ -26,26 +26,6 @@
 @endsection
 
 @section('content')
-    @if (session('success'))
-        <div class="alert alert-success alert-dismissible fade show" role="alert">
-            <i data-feather="check-circle" class="me-2"></i>{{ session('success') }}
-            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-        </div>
-    @endif
-    @if (session('error'))
-        <div class="alert alert-danger alert-dismissible fade show" role="alert">
-            <i data-feather="alert-circle" class="me-2"></i>{{ session('error') }}
-            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-        </div>
-    @endif
-    @if ($errors->any())
-        <div class="alert alert-danger" role="alert">
-            <strong>Please review the request:</strong>
-            <ul class="mb-0 mt-2">@foreach ($errors->all() as $error)<li>{{ $error }}</li>@endforeach</ul>
-        </div>
-    @endif
-
-
     <div class="card">
         <div class="card-header bg-white py-3">
             <div class="row align-items-center">
@@ -58,7 +38,9 @@
                     </small>
                 </div>
                 <div class="col-auto">
-                    <span id="request-total-count" data-count="{{ $requests->total() }}" class="badge bg-primary-soft text-primary px-3 py-2 px-3 py-2">{{ $requests->total() }} Total</span>
+                    <span class="badge bg-primary-soft text-primary px-3 py-2">
+                        {{ $requests->total() }} Total
+                    </span>
                 </div>
             </div>
         </div>
@@ -197,8 +179,10 @@
                                         </form>
                                         {{-- Reject --}}
                                         <button type="button" class="btn btn-sm btn-outline-danger reject-btn"
-                                            data-id="{{ $request->id }}" data-action="{{ route('admin.wallet.request.reject', $request->id) }}" data-name="{{ $request->user->name ?? 'User' }}"
-                                            data-bs-toggle="modal" data-bs-target="#rejectModal">
+                                            data-id="{{ $request->id }}"
+                                            data-action="{{ route('admin.wallet.request.reject', $request->id) }}"
+                                            data-name="{{ $request->user->name ?? 'User' }}" data-bs-toggle="modal"
+                                            data-bs-target="#rejectModal">
                                             <i data-feather="x" class="me-1"></i>
                                             Reject
                                         </button>
@@ -293,111 +277,74 @@
 
 @section('script')
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
     <script>
-        $(function () {
-            if (window.feather) window.feather.replace();
+        $(function() {
+            if (window.feather) feather.replace();
 
-            const notify = (icon, title, text) => {
-                if (window.Swal?.fire) return window.Swal.fire({ icon, title, text });
-                window.alert(text || title);
-            };
-            const removeProcessedRow = (requestId, message) => {
-                const $row = $('[data-wallet-request-row="' + requestId + '"]');
-                if (!$row.length) return;
-                const $count = $('#request-total-count');
-                const total = Math.max(0, Number($count.attr('data-count') || 0) - 1);
-                $count.attr('data-count', total).text(total + ' Total');
-                $row.fadeOut(140, function () {
-                    $(this).remove();
-                });
-                Promise.resolve(notify('success', 'Request processed', message || 'Wallet request processed successfully.'))
-                    .then(() => window.location.reload());
-            };
-
-            $(document).on('click.adminWalletRequests', '.view-proof-btn', function () {
+            $('.view-proof-btn').on('click', function() {
                 const $image = $('#proofImage');
-                $image.off('error.adminProof').on('error.adminProof', function () {
-                    $(this).attr('alt', 'Payment proof image is unavailable').removeAttr('src');
-                }).attr('src', $(this).data('image') || '');
+                $image.off('error').on('error', function() {
+                    $(this).attr('src', 'data:image/svg+xml;charset=UTF-8,' + encodeURIComponent(
+                        '<svg xmlns="http://www.w3.org/2000/svg" width="640" height="360"><rect width="100%" height="100%" fill="#f1f5f9"/><text x="50%" y="50%" text-anchor="middle" dominant-baseline="middle" fill="#64748b" font-family="Arial" font-size="22">Image unavailable</text></svg>'
+                    ));
+                }).attr('src', $(this).data('image'));
             });
 
-            $(document).on('click.adminWalletRequests', '.approve-btn', async function (event) {
-                event.preventDefault();
-                const $button = $(this);
-                const form = $button.closest('form').get(0);
-                if (!form || $button.prop('disabled')) return;
-                const confirmation = window.Swal?.fire
-                    ? await window.Swal.fire({
-                        title: 'Approve Wallet Request?',
-                        text: 'Approve ₹' + String($button.data('amount') || '') + ' for ' + String($button.data('name') || 'this user') + '?',
-                        icon: 'question',
-                        showCancelButton: true,
-                        confirmButtonText: 'Yes, approve',
-                        cancelButtonText: 'Cancel',
-                        reverseButtons: true
-                    })
-                    : { isConfirmed: window.confirm('Approve this wallet request?') };
-                if (!confirmation.isConfirmed) return;
-
-                $button.prop('disabled', true);
-                try {
-                    const response = await $.ajax({
-                        url: form.action,
-                        method: 'POST',
-                        data: $(form).serialize(),
-                        dataType: 'json',
-                        headers: { Accept: 'application/json', 'X-Requested-With': 'XMLHttpRequest' }
-                    });
-                    if (!response?.success || !response.data?.request_id) throw new Error(response?.message || 'Approval was not confirmed by the server.');
-                    removeProcessedRow(response.data.request_id, response.message);
-                } catch (error) {
-                    const payload = error.responseJSON || {};
-                    const detail = payload.errors ? Object.values(payload.errors).flat()[0] : null;
-                    notify('error', 'Approval failed', detail || payload.message || (error.status === 419 ? 'Your session expired. Refresh the page and try again.' : 'The request could not be approved.'));
-                } finally {
-                    $button.prop('disabled', false);
-                }
+            $('.approve-btn').on('click', function() {
+                const form = $(this).closest('form').get(0);
+                const name = $(this).data('name');
+                const amount = $(this).data('amount');
+                Swal.fire({
+                    title: 'Approve Wallet Top-up?',
+                    html: '<div class="text-center"><p class="mb-1">User: <strong>' + $('<div>')
+                        .text(name).html() +
+                        '</strong></p><p>Amount: <strong class="text-success">₹' + $('<div>').text(
+                            amount).html() +
+                        '</strong></p><small class="text-muted">This amount will be credited to the user\'s wallet.</small></div>',
+                    icon: 'question',
+                    showCancelButton: true,
+                    confirmButtonColor: '#1cc88a',
+                    cancelButtonColor: '#858796',
+                    confirmButtonText: 'Yes, Approve',
+                    cancelButtonText: 'Cancel'
+                }).then(result => {
+                    if (result.isConfirmed) form.submit();
+                });
             });
 
-            $(document).on('click.adminWalletRequests', '.reject-btn', function () {
-                const $button = $(this);
-                $('#rejectUserName').text($button.data('name') || 'User');
-                $('#rejectForm').attr('action', $button.data('action') || '').attr('data-request-id', $button.data('id') || '');
-                $('#rejectForm [name="admin_remark"]').val('');
+            $('.reject-btn').on('click', function() {
+                $('#rejectUserName').text($(this).data('name'));
+                $('#rejectForm').attr('action', $(this).data('action'));
             });
+        });
 
-            $('#rejectForm').on('submit.adminWalletRequests', async function (event) {
-                event.preventDefault();
-                const $form = $(this);
-                const action = $form.attr('action');
-                const requestId = $form.attr('data-request-id');
-                const remark = String($form.find('[name="admin_remark"]').val() || '').trim();
-                if (!action || !requestId || !remark) {
-                    notify('warning', 'Rejection reason required', 'Enter a reason before rejecting this request.');
-                    return;
-                }
-                const $button = $form.find('[type="submit"]');
-                if ($button.prop('disabled')) return;
-                $button.prop('disabled', true);
-                try {
-                    const response = await $.ajax({
-                        url: action,
-                        method: 'POST',
-                        data: $form.serialize(),
-                        dataType: 'json',
-                        headers: { Accept: 'application/json', 'X-Requested-With': 'XMLHttpRequest' }
-                    });
-                    if (!response?.success || !response.data?.request_id) throw new Error(response?.message || 'Rejection was not confirmed by the server.');
-                    if (window.bootstrap) bootstrap.Modal.getOrCreateInstance($('#rejectModal').get(0)).hide();
-                    removeProcessedRow(response.data.request_id, response.message);
-                } catch (error) {
-                    const payload = error.responseJSON || {};
-                    const detail = payload.errors ? Object.values(payload.errors).flat()[0] : null;
-                    notify('error', 'Rejection failed', detail || payload.message || (error.status === 419 ? 'Your session expired. Refresh the page and try again.' : 'The request could not be rejected.'));
-                } finally {
-                    $button.prop('disabled', false);
-                }
+        $(document).on('click.adminWalletRequests', '.approve-btn', function() {
+            const $button = $(this);
+            const form = $button.closest('form')[0];
+            const name = escapeHtml($button.data('name'));
+            const amount = escapeHtml($button.data('amount'));
+            if (!form || typeof Swal === 'undefined') return;
+            Swal.fire({
+                title: 'Approve Wallet Top-up?',
+                html: '<div class="text-center"><p class="mb-1">User: <strong>' + name +
+                    '</strong></p><p>Amount: <strong class="text-success">₹' + amount +
+                    '</strong></p><small class="text-muted">This amount will be credited to the user`s wallet. </small></div> ',
+                icon: 'question',
+                showCancelButton: true,
+                confirmButtonColor: '#1cc88a',
+                cancelButtonColor: '#858796',
+                confirmButtonText: 'Yes, Approve',
+                cancelButtonText: 'Cancel'
+            }).then(result => {
+                if (result.isConfirmed) form.submit();
             });
+        });
+
+        $(document).on('click.adminWalletRequests', '.reject-btn', function() {
+            const $button = $(this);
+            $('#rejectUserName').text($button.data('name') || '');
+            $('#rejectForm').attr('action', $button.data('action') || '');
         });
     </script>
 @endsection
